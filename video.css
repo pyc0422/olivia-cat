@@ -1,0 +1,248 @@
+.view-tab-video {
+  background: linear-gradient(180deg, #b6f0ff, #8adcf6);
+}
+
+.video-studio {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 0.24rem solid var(--line);
+  border-radius: 26% 26% 20% 20% / 16% 16% 18% 18%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12)),
+    rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 10px 22px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.video-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.video-kicker,
+.video-title,
+.video-note {
+  margin: 0;
+}
+
+.video-kicker {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.video-title {
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
+  line-height: 0.95;
+  font-weight: 700;
+}
+
+.video-note {
+  font-size: 1.05rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.video-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.video-record-button {
+  appearance: none;
+  width: 3.3rem;
+  height: 3.3rem;
+  border: 0.18rem solid var(--line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #97e8ff, #68cdea);
+  color: var(--ink);
+  font: inherit;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 6px 14px rgba(68, 51, 36, 0.08);
+}
+
+.video-record-button.is-recording {
+  background: linear-gradient(180deg, #ff9e9e, #ff7d7d);
+}
+
+.video-status {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+.video-layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.92fr) minmax(18rem, 1.08fr);
+  gap: 1rem;
+}
+
+.video-preview-panel,
+.video-gallery-panel {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.95rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 252, 245, 0.72);
+}
+
+.video-panel-title {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.video-panel-note {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.video-preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 0.18rem solid var(--line);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.55), transparent 42%),
+    #0f172a;
+  object-fit: cover;
+}
+
+.video-gallery {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.video-empty {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 0.18rem dashed rgba(60, 52, 47, 0.3);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+.video-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 8px 16px rgba(68, 51, 36, 0.08);
+}
+
+.video-card-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  background: #000;
+  object-fit: cover;
+}
+
+.video-card-meta {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.video-card-controls {
+  position: relative;
+  justify-self: end;
+}
+
+.video-card-more,
+.video-card-delete {
+  appearance: none;
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 252, 245, 0.95);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.video-card-more {
+  padding: 0.35rem 0.85rem 0.3rem;
+  min-width: 4.8rem;
+}
+
+.video-card-delete {
+  width: 100%;
+  padding: 0.45rem 0.8rem 0.38rem;
+}
+
+.video-card-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 2;
+  min-width: 8rem;
+  padding: 0.45rem;
+  border: 0.16rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 252, 245, 0.98);
+  box-shadow: 0 12px 20px rgba(68, 51, 36, 0.12);
+}
+
+.video-card.is-menu-open {
+  z-index: 3;
+}
+
+.video-card-meta {
+  position: relative;
+}
+
+.video-card-title,
+.video-card-duration {
+  margin: 0;
+}
+
+.video-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.video-card-duration {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 980px) {
+  .video-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .video-studio {
+    padding: 1rem;
+  }
+
+  .video-preview-panel,
+  .video-gallery-panel {
+    padding: 0.85rem;
+  }
+
+  .video-card-menu {
+    left: 0;
+    right: auto;
+  }
+}

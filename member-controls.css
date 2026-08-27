@@ -1,0 +1,79 @@
+.member-list {
+  gap: 0.35rem;
+}
+
+.member-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.1rem 0.25rem;
+}
+
+.member-item.is-revealed,
+.member-item:hover,
+.member-item:focus-within {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.member-name,
+.member-remove {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+}
+
+.member-name {
+  padding: 0.05rem 0.15rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.member-remove {
+  width: 1.35rem;
+  height: 1.35rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(60, 52, 47, 0.08);
+  color: var(--line);
+  font-size: 1.2rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    background 140ms ease;
+}
+
+.member-item.is-revealed .member-remove,
+.member-item:hover .member-remove,
+.member-item:focus-within .member-remove {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.member-remove:hover,
+.member-remove:focus {
+  background: rgba(60, 52, 47, 0.16);
+}
+
+.member-empty {
+  list-style: none;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  padding: 0.35rem 0;
+}
+
+.member-card-secondary .member-list {
+  align-content: center;
+  min-height: 8rem;
+}

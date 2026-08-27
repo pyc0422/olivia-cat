@@ -8,12 +8,33 @@
       name="description"
       content="A hand-drawn Cat Club website inspired by the paper mockup, ready for more details later."
     />
+    <link rel="stylesheet" href="./password-gate.css" />
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./board.css" />
+    <link rel="stylesheet" href="./member-controls.css" />
+    <link rel="stylesheet" href="./avatar.css" />
+    <link rel="stylesheet" href="./video.css" />
+    <link rel="stylesheet" href="./art.css" />
   </head>
   <body>
+    <section class="password-gate" id="password-gate" aria-label="Password gate">
+      <div class="password-card cat-box">
+        <h1 class="password-title">PASSWORD</h1>
+        <label class="password-label" for="password-input">Enter the password</label>
+        <input
+          id="password-input"
+          class="password-input"
+          type="password"
+          autocomplete="current-password"
+          inputmode="text"
+          placeholder="Type here"
+        />
+        <p class="password-hint">Password: Cats</p>
+        <p class="password-error" id="password-error" aria-live="polite"></p>
+      </div>
+    </section>
+
     <main class="page">
-      <section class="poster" aria-label="Cat Club website draft">
+      <section class="poster is-locked" id="site-poster" aria-label="Cat Club website draft">
         <header class="masthead">
           <div class="logo-mark" aria-hidden="true">
             <span></span>
@@ -26,114 +47,286 @@
           </h1>
         </header>
 
-        <section class="layout">
-          <aside class="side-notes side-notes-left" aria-label="Club notes">
-            <div class="note note-signup cat-box">
-              <p class="note-title">Sign up</p>
-              <div class="heart" aria-hidden="true"></div>
-              <p class="note-copy">Name, class, or club: CatClub!</p>
-            </div>
+        <nav class="site-tabs" aria-label="Cat Club sections">
+          <button class="view-tab is-active" type="button" data-view-target="board" aria-pressed="true">Board</button>
+          <button class="view-tab view-tab-avatar" type="button" data-view-target="avatar" aria-pressed="false">Avatar</button>
+          <button class="view-tab view-tab-video" type="button" data-view-target="videos" aria-pressed="false">Videos</button>
+          <button class="view-tab view-tab-art" type="button" data-view-target="art" aria-pressed="false">Art</button>
+          <button class="view-tab view-tab-music" type="button" data-music-toggle aria-pressed="false">Music off</button>
+        </nav>
 
-            <div class="note note-message cat-box">
-              <p class="note-title">Message</p>
-              <p class="note-copy">Drop announcements, reminders, or links here.</p>
-              <p class="note-small">oliviayx@icloud.com</p>
-              <p class="note-small">ebshukis@icloud.com</p>
-              <p class="note-small">h.e.zhao@icloud.com</p>
-              <p class="note-small">isabellazhang520@gmail.com</p>
-              <a class="chat-button" href="sms:" aria-label="Chat here in Messages">Chat here</a>
-            </div>
-          </aside>
-
-          <section class="board" aria-label="Main content area">
-            <div class="board-header">
-              <p class="eyebrow">留言板</p>
-              <p class="subhead">Pick a member name, type a note, and post it to the board.</p>
-            </div>
-
-            <div class="board-body">
-              <section class="message-board cat-box" aria-label="Editable message board">
-                <div class="message-board-copy">
-                  <p class="message-board-title">Cat Club board</p>
-                  <p class="message-board-note">Messages stay on this device and can use any member name.</p>
+        <div class="site-panels">
+          <section class="site-view site-view-board" data-view-panel="board">
+            <section class="layout">
+              <aside class="side-notes side-notes-left" aria-label="Club notes">
+                <div class="note note-signup cat-box">
+                  <p class="note-title">Sign up</p>
+                  <div class="heart" aria-hidden="true"></div>
+                  <p class="note-copy">Name, class, or club: CatClub!</p>
                 </div>
 
-                <form class="message-form" id="message-form">
-                  <label class="field field-select" for="message-author">
-                    <span class="field-label">Name</span>
-                    <select id="message-author" name="author">
-                      <optgroup label="Members">
-                        <option>Izzy</option>
-                        <option>Lexi</option>
-                        <option>Olivia</option>
-                        <option>Eve</option>
-                        <option>Alison</option>
-                      </optgroup>
-                      <optgroup label="New members">
-                        <option>Elise</option>
-                        <option>Audrey</option>
-                      </optgroup>
-                    </select>
-                  </label>
+                <div class="note note-message cat-box">
+                  <p class="note-title">Message</p>
+                  <p class="note-copy">Drop announcements, reminders, or links here.</p>
+                  <p class="note-small">oliviayx@icloud.com</p>
+                  <p class="note-small">ebshukis@icloud.com</p>
+                  <p class="note-small">h.e.zhao@icloud.com</p>
+                  <p class="note-small">isabellazhang520@gmail.com</p>
+                  <a class="chat-button" href="sms:" aria-label="Chat here in Messages">Chat here</a>
+                </div>
+              </aside>
 
-                  <label class="field field-message" for="message-text">
-                    <span class="field-label">Message</span>
-                    <textarea
-                      id="message-text"
-                      name="message"
-                      rows="4"
-                      maxlength="280"
-                      placeholder="Type a message for the club..."
-                    ></textarea>
-                  </label>
+              <section class="board" aria-label="Main content area">
+                <div class="board-header">
+                  <p class="eyebrow">留言板</p>
+                  <p class="subhead">Pick a member name, type a note, and post it to the board.</p>
+                </div>
 
-                  <div class="message-actions">
-                    <p class="message-hint">Use any name from the member list.</p>
-                    <button type="submit">Post message</button>
+                <div class="board-body">
+                  <section class="message-board cat-box" aria-label="Editable message board">
+                    <div class="message-board-copy">
+                      <p class="message-board-title">Cat Club board</p>
+                      <p class="message-board-note">Messages stay on this device and can use any member name.</p>
+                    </div>
+
+                    <form class="message-form" id="message-form">
+                      <label class="field field-select" for="message-author">
+                        <span class="field-label">Name</span>
+                        <select id="message-author" name="author">
+                          <optgroup label="Members">
+                            <option>Izzy</option>
+                            <option>Lexi</option>
+                            <option>Olivia</option>
+                            <option>Eve</option>
+                            <option>Alison</option>
+                            <option>Hailey</option>
+                          </optgroup>
+                          <optgroup label="New members">
+                            <option>Elise</option>
+                            <option>Audrey</option>
+                          </optgroup>
+                        </select>
+                      </label>
+
+                      <label class="field field-message" for="message-text">
+                        <span class="field-label">Message</span>
+                        <textarea
+                          id="message-text"
+                          name="message"
+                          rows="4"
+                          maxlength="280"
+                          placeholder="Type a message for the club..."
+                        ></textarea>
+                      </label>
+
+                      <div class="message-actions">
+                        <p class="message-hint">Use any name from the member list.</p>
+                        <button type="submit">Post message</button>
+                      </div>
+                    </form>
+
+                    <div class="message-feed-wrap">
+                      <p class="feed-heading">Recent messages</p>
+                      <div class="message-feed" id="message-feed" aria-live="polite" aria-label="Messages posted to the board"></div>
+                    </div>
+                  </section>
+                </div>
+
+                <div class="board-doodle" aria-hidden="true">
+                  <svg viewBox="0 0 900 220" role="presentation" focusable="false">
+                    <path d="M75 160c24-38 69-56 121-48 37 6 66 26 86 53" />
+                    <path d="M78 159c10-22 21-45 32-67" />
+                    <path d="M122 155c12-25 30-48 53-70" />
+                    <path d="M228 165c7-42 17-69 31-85 18-19 43-29 77-30 38-1 70 9 95 29 19 16 36 40 48 73" />
+                    <path d="M246 88c-7-18-11-31-11-41 0-18 8-33 24-45" />
+                    <path d="M300 74c0-24 6-44 19-59" />
+                    <path d="M478 161c18-33 43-53 74-60 29-7 62 0 96 20 28 17 50 40 66 69" />
+                    <path d="M531 84c12-20 27-36 46-49" />
+                    <path d="M588 88c10-18 23-33 39-46" />
+                    <path d="M664 164c18-8 32-17 42-29 13-15 20-35 23-60" />
+                    <path d="M707 75c8 10 16 16 24 19 14 5 28 4 42-4" />
+                    <path d="M786 149c18-18 32-31 43-40" />
+                    <path d="M730 114l-18 34 32-2-16 34 42-30-28-1 14-29z" />
+                  </svg>
+                </div>
+
+                <div class="board-footer">
+                  <div class="member-card member-card-primary cat-box">
+                    <p class="card-title">Members</p>
+                    <ul class="member-list" id="members-list"></ul>
                   </div>
-                </form>
 
-                <div class="message-feed-wrap">
-                  <p class="feed-heading">Recent messages</p>
-                  <div class="message-feed" id="message-feed" aria-live="polite" aria-label="Messages posted to the board"></div>
+                  <div class="member-card member-card-secondary cat-box">
+                    <p class="card-title">New members</p>
+                    <ul class="member-list" id="new-members-list"></ul>
+                  </div>
+                </div>
+              </section>
+            </section>
+          </section>
+
+          <section class="site-view site-view-avatar" data-view-panel="avatar" hidden>
+            <section class="avatar-studio cat-box" aria-label="Avatar studio">
+              <div class="avatar-copy">
+                <p class="avatar-kicker">Avatar</p>
+                <h2 class="avatar-title">Cute cat maker</h2>
+                <p class="avatar-note">Change the color, eyes, mouth, and clothes.</p>
+              </div>
+
+              <div class="avatar-grid">
+                <div class="avatar-preview-wrap">
+                  <div class="avatar-preview">
+                    <div
+                      class="avatar-stage"
+                      id="avatar-stage"
+                      data-color="orange"
+                      data-eyes="round"
+                      data-mouth="smile"
+                      data-clothes="hoodie"
+                    >
+                      <div class="avatar-cat" aria-label="Cute cat preview">
+                        <span class="avatar-ear avatar-ear-left" aria-hidden="true"></span>
+                        <span class="avatar-ear avatar-ear-right" aria-hidden="true"></span>
+                        <span class="avatar-face" aria-hidden="true">
+                          <span class="avatar-eye avatar-eye-left"></span>
+                          <span class="avatar-eye avatar-eye-right"></span>
+                          <span class="avatar-blush avatar-blush-left"></span>
+                          <span class="avatar-blush avatar-blush-right"></span>
+                          <span class="avatar-nose"></span>
+                          <span class="avatar-mouth"></span>
+                          <span class="avatar-whisker avatar-whisker-left"></span>
+                          <span class="avatar-whisker avatar-whisker-right"></span>
+                        </span>
+                        <span class="avatar-clothes"></span>
+                        <span class="avatar-tail"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="avatar-caption">Use the options to build a friendlier cat.</p>
+                </div>
+
+                <div class="avatar-controls" aria-label="Avatar controls">
+                  <div class="avatar-control-group">
+                    <p class="avatar-control-title">Color</p>
+                    <div class="avatar-options" data-avatar-group="color">
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="orange"><span aria-hidden="true"></span>Orange</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="cream"><span aria-hidden="true"></span>Cream</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="gray"><span aria-hidden="true"></span>Gray</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="mint"><span aria-hidden="true"></span>Mint</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="pink"><span aria-hidden="true"></span>Pink</button>
+                    </div>
+                  </div>
+
+                  <div class="avatar-control-group">
+                    <p class="avatar-control-title">Eyes</p>
+                    <div class="avatar-options" data-avatar-group="eyes">
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="round">Round</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="sleepy">Sleepy</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="sparkle">Sparkle</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="wink">Wink</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="star">Star</button>
+                    </div>
+                  </div>
+
+                  <div class="avatar-control-group">
+                    <p class="avatar-control-title">Mouth</p>
+                    <div class="avatar-options" data-avatar-group="mouth">
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="smile">Smile</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="tiny">Tiny</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="open">Open</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="tongue">Tongue</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="shy">Shy</button>
+                    </div>
+                  </div>
+
+                  <div class="avatar-control-group">
+                    <p class="avatar-control-title">Clothes</p>
+                    <div class="avatar-options" data-avatar-group="clothes">
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="none">None</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="tee">Tee</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="hoodie">Hoodie</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="scarf">Scarf</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="bow">Bow</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-videos" data-view-panel="videos" hidden>
+            <section class="video-studio cat-box" aria-label="Video gallery">
+              <div class="video-copy">
+                <p class="video-kicker">Videos</p>
+                <h2 class="video-title">Recorded cat clips</h2>
+                <p class="video-note">Press + to record a video and save it into the gallery.</p>
+              </div>
+
+              <div class="video-topbar">
+                <button class="video-record-button" id="video-record-button" type="button" aria-pressed="false">+</button>
+                <p class="video-status" id="video-status">Ready to record.</p>
+              </div>
+
+              <div class="video-layout">
+                <div class="video-preview-panel">
+                  <p class="video-panel-title">Camera</p>
+                  <video id="video-preview" class="video-preview" autoplay muted playsinline></video>
+                  <p class="video-panel-note" id="video-permission-note">Allow camera access to start a recording.</p>
+                </div>
+
+                <div class="video-gallery-panel">
+                  <p class="video-panel-title">Gallery</p>
+                  <div class="video-gallery" id="video-gallery" aria-live="polite"></div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-art" data-view-panel="art" hidden>
+            <section class="art-studio cat-box" aria-label="Art gallery">
+              <div class="art-copy">
+                <p class="art-kicker">Art</p>
+                <h2 class="art-title">Drawing gallery</h2>
+                <p class="art-note">Press + to open a blank whiteboard, doodle, choose a color, and save it here.</p>
+              </div>
+
+              <div class="art-topbar">
+                <button class="art-new-button" id="art-new-button" type="button" aria-label="Create a new drawing">+</button>
+                <p class="art-status" id="art-status">Ready to draw.</p>
+              </div>
+
+              <div class="art-gallery" id="art-gallery" aria-live="polite"></div>
+            </section>
+
+            <div class="art-composer" id="art-composer" hidden>
+              <section class="art-composer-card cat-box" aria-label="Whiteboard drawing board">
+                <div class="art-composer-header">
+                  <div class="art-composer-copy">
+                    <p class="art-composer-kicker">Whiteboard</p>
+                    <p class="art-composer-note">Use the color button to pick a paint color, then draw on the blank canvas.</p>
+                  </div>
+
+                  <div class="art-composer-actions">
+                    <button class="art-color-button" id="art-color-button" type="button" aria-expanded="false">Color</button>
+                    <button class="art-save-button" id="art-save-button" type="button" aria-label="Save drawing">✓</button>
+                    <button class="art-close-button" id="art-close-button" type="button" aria-label="Close whiteboard">×</button>
+                  </div>
+                </div>
+
+                <div class="art-palette" id="art-palette" hidden></div>
+
+                <div class="art-canvas-shell">
+                  <canvas id="art-canvas"></canvas>
                 </div>
               </section>
             </div>
-
-            <div class="board-doodle" aria-hidden="true">
-              <svg viewBox="0 0 900 220" role="presentation" focusable="false">
-                <path d="M75 160c24-38 69-56 121-48 37 6 66 26 86 53" />
-                <path d="M78 159c10-22 21-45 32-67" />
-                <path d="M122 155c12-25 30-48 53-70" />
-                <path d="M228 165c7-42 17-69 31-85 18-19 43-29 77-30 38-1 70 9 95 29 19 16 36 40 48 73" />
-                <path d="M246 88c-7-18-11-31-11-41 0-18 8-33 24-45" />
-                <path d="M300 74c0-24 6-44 19-59" />
-                <path d="M478 161c18-33 43-53 74-60 29-7 62 0 96 20 28 17 50 40 66 69" />
-                <path d="M531 84c12-20 27-36 46-49" />
-                <path d="M588 88c10-18 23-33 39-46" />
-                <path d="M664 164c18-8 32-17 42-29 13-15 20-35 23-60" />
-                <path d="M707 75c8 10 16 16 24 19 14 5 28 4 42-4" />
-                <path d="M786 149c18-18 32-31 43-40" />
-                <path d="M730 114l-18 34 32-2-16 34 42-30-28-1 14-29z" />
-              </svg>
-            </div>
-
-            <div class="board-footer">
-              <div class="member-card member-card-primary cat-box">
-                <p class="card-title">Members</p>
-                <ul class="member-list" id="members-list"></ul>
-              </div>
-
-              <div class="member-card member-card-secondary cat-box">
-                <p class="card-title">New members</p>
-                <ul class="member-list" id="new-members-list"></ul>
-              </div>
-            </div>
           </section>
-        </section>
+        </div>
       </section>
     </main>
 
     <script src="./script.js"></script>
+    <script src="./video.js"></script>
+    <script src="./art.js"></script>
   </body>
 </html>
