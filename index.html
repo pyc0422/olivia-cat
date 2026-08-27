@@ -9,6 +9,7 @@
       content="A hand-drawn Cat Club website inspired by the paper mockup, ready for more details later."
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./board.css" />
   </head>
   <body>
     <main class="page">
@@ -46,12 +47,57 @@
 
           <section class="board" aria-label="Main content area">
             <div class="board-header">
-              <p class="eyebrow">Welcome to the club</p>
-              <p class="subhead">This page follows the sketch and leaves room for future details.</p>
+              <p class="eyebrow">留言板</p>
+              <p class="subhead">Pick a member name, type a note, and post it to the board.</p>
             </div>
 
             <div class="board-body">
-              <div class="placeholder-panel cat-box" aria-label="Main content area"></div>
+              <section class="message-board cat-box" aria-label="Editable message board">
+                <div class="message-board-copy">
+                  <p class="message-board-title">Cat Club board</p>
+                  <p class="message-board-note">Messages stay on this device and can use any member name.</p>
+                </div>
+
+                <form class="message-form" id="message-form">
+                  <label class="field field-select" for="message-author">
+                    <span class="field-label">Name</span>
+                    <select id="message-author" name="author">
+                      <optgroup label="Members">
+                        <option>Izzy</option>
+                        <option>Lexi</option>
+                        <option>Olivia</option>
+                        <option>Eve</option>
+                        <option>Alison</option>
+                      </optgroup>
+                      <optgroup label="New members">
+                        <option>Elise</option>
+                        <option>Audrey</option>
+                      </optgroup>
+                    </select>
+                  </label>
+
+                  <label class="field field-message" for="message-text">
+                    <span class="field-label">Message</span>
+                    <textarea
+                      id="message-text"
+                      name="message"
+                      rows="4"
+                      maxlength="280"
+                      placeholder="Type a message for the club..."
+                    ></textarea>
+                  </label>
+
+                  <div class="message-actions">
+                    <p class="message-hint">Use any name from the member list.</p>
+                    <button type="submit">Post message</button>
+                  </div>
+                </form>
+
+                <div class="message-feed-wrap">
+                  <p class="feed-heading">Recent messages</p>
+                  <div class="message-feed" id="message-feed" aria-live="polite" aria-label="Messages posted to the board"></div>
+                </div>
+              </section>
             </div>
 
             <div class="board-doodle" aria-hidden="true">
@@ -75,21 +121,12 @@
             <div class="board-footer">
               <div class="member-card member-card-primary cat-box">
                 <p class="card-title">Members</p>
-                <ul class="member-list">
-                  <li>Izzy</li>
-                  <li>Lexi</li>
-                  <li>Olivia</li>
-                  <li>Eve</li>
-                  <li>Alison</li>
-                </ul>
+                <ul class="member-list" id="members-list"></ul>
               </div>
 
               <div class="member-card member-card-secondary cat-box">
                 <p class="card-title">New members</p>
-                <ul class="member-list">
-                  <li>Elise</li>
-                  <li>Audrey</li>
-                </ul>
+                <ul class="member-list" id="new-members-list"></ul>
               </div>
             </div>
           </section>
