@@ -1,0 +1,10 @@
+.env.local
+.env.*
+!.env.example
+.next/
+node_modules/
+dist/
+coverage/
+*.log
+npm-debug.log*
+vercel-debug.log*

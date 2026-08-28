@@ -1,7 +1,9 @@
-document.addEventListener("DOMContentLoaded", () => {
+const initCatClubVideo = () => {
   if (window.__catClubVideoReady) {
     return;
   }
+
+  window.__catClubVideoReady = true;
 
   const videoRecordButton = document.querySelector("#video-record-button");
   const videoPreview = document.querySelector("#video-preview");
@@ -343,5 +345,10 @@ document.addEventListener("DOMContentLoaded", () => {
     revokeGalleryUrls();
   });
 
-  window.__catClubVideoReady = true;
-});
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCatClubVideo, { once: true });
+} else {
+  initCatClubVideo();
+}

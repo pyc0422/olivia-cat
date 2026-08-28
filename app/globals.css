@@ -1,0 +1,148 @@
+@import "../password-gate.css";
+@import "../styles.css";
+@import "../member-controls.css";
+@import "../avatar.css";
+@import "../video.css";
+@import "../art.css";
+@import "../levels.css";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.5), transparent 24%),
+    linear-gradient(145deg, #d39a52 0%, #c68a45 22%, #b47836 58%, #a46b2f 100%);
+}
+
+.auth-card {
+  width: min(36rem, 100%);
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.auth-kicker {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-soft);
+}
+
+.auth-title {
+  margin: 0;
+  font-family: "Amatic SC", "Trebuchet MS", cursive;
+  font-size: clamp(3rem, 8vw, 4.7rem);
+  line-height: 0.9;
+}
+
+.auth-copy {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.auth-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.auth-switcher button {
+  appearance: none;
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem 0.35rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-switcher button.is-active {
+  background: rgba(185, 202, 206, 0.98);
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.auth-field span {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.auth-field input,
+.auth-field select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.6rem 0.85rem;
+  border: 0.16rem solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.96);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-actions button,
+.auth-actions a {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 0.16rem solid var(--line);
+  background: linear-gradient(180deg, #d8f7cb, #b6e79f);
+  color: var(--ink);
+  text-decoration: none;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-actions a {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.auth-error,
+.auth-message {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.auth-error {
+  color: #8b2020;
+}
+
+.auth-message {
+  color: #245a21;
+}

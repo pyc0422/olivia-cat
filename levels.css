@@ -1,0 +1,261 @@
+.view-tab-levels {
+  background: linear-gradient(180deg, #f5d6ff, #d9bfff);
+}
+
+.levels-studio {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 0.24rem solid var(--line);
+  border-radius: 26% 26% 20% 20% / 16% 16% 18% 18%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12)),
+    rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 10px 22px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.levels-copy {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.levels-kicker,
+.levels-title,
+.levels-note {
+  margin: 0;
+}
+
+.levels-kicker {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.levels-title {
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
+  line-height: 0.95;
+  font-weight: 700;
+}
+
+.levels-note {
+  font-size: 1.05rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.levels-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.levels-graph-panel,
+.levels-sidebar {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.levels-graph-panel {
+  padding: 0.95rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 252, 245, 0.72);
+}
+
+.levels-panel-title,
+.levels-group-label {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.levels-graph {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.45rem;
+  min-height: 32rem;
+}
+
+.levels-tier {
+  display: grid;
+  grid-template-columns: minmax(4.6rem, 5.4rem) minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: center;
+  padding: 0.7rem 0.75rem;
+  border: 0.16rem solid rgba(60, 52, 47, 0.12);
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.55)),
+    rgba(255, 255, 255, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.levels-tier.is-current-tier {
+  border-color: rgba(68, 51, 36, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 18px rgba(68, 51, 36, 0.08);
+}
+
+.levels-tier-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0.2rem 0.55rem 0.15rem;
+  border: 0.16rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 252, 245, 0.96);
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.levels-tier-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.levels-chip {
+  appearance: none;
+  border: 0.16rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem 0.3rem;
+  background: rgba(255, 252, 245, 0.98);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.levels-chip.is-selected {
+  background: rgba(185, 202, 206, 0.96);
+}
+
+.levels-sidebar {
+  align-content: start;
+}
+
+.levels-name-card,
+.levels-status-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.95rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 20px;
+  background: rgba(255, 252, 245, 0.72);
+}
+
+.levels-name-groups {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.levels-name-group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.levels-name-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.levels-name-button {
+  appearance: none;
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem 0.33rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.levels-name-button.is-selected {
+  background: rgba(185, 202, 206, 0.98);
+}
+
+.levels-status-name {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.levels-status-text {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.levels-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.levels-level-button {
+  appearance: none;
+  width: 3.3rem;
+  height: 3.3rem;
+  border: 0.18rem solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 6px 14px rgba(68, 51, 36, 0.08);
+}
+
+.levels-down-button {
+  background: linear-gradient(180deg, #ffe0e0, #f4b8b8);
+}
+
+.levels-up-button {
+  background: linear-gradient(180deg, #d8f7cb, #b6e79f);
+}
+
+@media (max-width: 980px) {
+  .levels-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .levels-graph {
+    min-height: 28rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .levels-studio {
+    padding: 1rem;
+  }
+
+  .levels-graph-panel,
+  .levels-name-card,
+  .levels-status-card {
+    padding: 0.85rem;
+  }
+
+  .levels-graph {
+    min-height: 24rem;
+  }
+}

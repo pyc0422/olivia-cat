@@ -1,4 +1,11 @@
-document.addEventListener("DOMContentLoaded", () => {
+const initCatClubBoard = () => {
+  if (window.__catClubBoardReady) {
+    return;
+  }
+
+  window.__catClubBoardReady = true;
+
+  void (async () => {
   const gate = document.querySelector("#password-gate");
   const passwordInput = document.querySelector("#password-input");
   const passwordError = document.querySelector("#password-error");
@@ -20,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const musicKey = "catclub-music";
   const videoDbName = "catclub-videos";
   const videoStoreName = "recordings";
-  const expectedPassword = "Cats";
   const avatarDefaults = {
     color: "orange",
     eyes: "round",
@@ -56,6 +62,60 @@ document.addEventListener("DOMContentLoaded", () => {
     recording: false,
     galleryUrls: new Map(),
   };
+
+  const waitForSupabaseDb = async (timeoutMs = 2500) => {
+    if (window.catclubDb) {
+      return window.catclubDb;
+    }
+
+    return new Promise((resolve) => {
+      let settled = false;
+
+      const finish = () => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        window.removeEventListener("catclub-supabase-ready", onReady);
+        window.clearTimeout(timer);
+        resolve(window.catclubDb || null);
+      };
+
+      const onReady = () => finish();
+      const timer = window.setTimeout(finish, timeoutMs);
+
+      window.addEventListener("catclub-supabase-ready", onReady, { once: true });
+    });
+  };
+
+  const db = await waitForSupabaseDb();
+  const authSession = db ? await db.getSession().catch(() => null) : null;
+  const currentUser = db ? await db.getUser().catch(() => null) : null;
+  const currentProfile = db && currentUser ? await db.loadProfiles().then((profiles) => profiles.find((profile) => profile.id === currentUser.id) || null).catch(() => null) : null;
+  const resolvedCurrentProfile =
+    db && currentUser
+      ? currentProfile ||
+        (await db
+          .ensureProfile({
+            name: currentUser.user_metadata?.name || currentUser.email || "Unknown",
+            email: currentUser.email || "",
+            phone: currentUser.user_metadata?.phone || null,
+            member_group: currentUser.user_metadata?.member_group || "members",
+            level: currentUser.user_metadata?.level || "Noob",
+            avatar_color: currentUser.user_metadata?.avatar_color || "orange",
+            avatar_eyes: currentUser.user_metadata?.avatar_eyes || "round",
+            avatar_mouth: currentUser.user_metadata?.avatar_mouth || "smile",
+            avatar_clothes: currentUser.user_metadata?.avatar_clothes || "hoodie",
+            board_visible: true,
+          })
+          .catch(() => null))
+      : null;
+
+  const shouldRedirectToAuth = !authSession;
+  if (gate) {
+    gate.hidden = true;
+  }
 
   const loadJson = (key, fallback) => {
     try {
@@ -129,6 +189,14 @@ document.addEventListener("DOMContentLoaded", () => {
     videoRecordButton.textContent = videoState.recording ? "Stop" : "+";
   };
 
+  const blobToDataUrl = (blob) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+      reader.onerror = () => reject(reader.error || new Error("Unable to read recording."));
+      reader.readAsDataURL(blob);
+    });
+
   const openVideoDb = () =>
     new Promise((resolve, reject) => {
       if (videoState.db) {
@@ -139,9 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const request = window.indexedDB.open(videoDbName, 1);
 
       request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(videoStoreName)) {
-          db.createObjectStore(videoStoreName, { keyPath: "id" });
+        const localDb = request.result;
+        if (!localDb.objectStoreNames.contains(videoStoreName)) {
+          localDb.createObjectStore(videoStoreName, { keyPath: "id" });
         }
       };
 
@@ -162,17 +230,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   const getStoredVideos = async () => {
-    const db = await openVideoDb();
-    const tx = db.transaction(videoStoreName, "readonly");
+    if (db) {
+      return db.loadVideos().catch(() => []);
+    }
+
+    const localDb = await openVideoDb();
+    const tx = localDb.transaction(videoStoreName, "readonly");
     const store = tx.objectStore(videoStoreName);
     const videos = await idbRequest(store.getAll());
     return Array.isArray(videos) ? videos.sort((a, b) => b.createdAt - a.createdAt) : [];
   };
 
   const saveVideoRecord = async (record) => {
-    const db = await openVideoDb();
-    const tx = db.transaction(videoStoreName, "readwrite");
+    if (db) {
+      await db.addVideo({
+        user_id: currentUser?.id,
+        author_name: resolvedCurrentProfile?.name || record.authorName || "Unknown",
+        title: "Cat Club video",
+        mime_type: record.mimeType || "video/webm",
+        data_url: record.dataUrl || "",
+      });
+      return;
+    }
+
+    const localDb = await openVideoDb();
+    const tx = localDb.transaction(videoStoreName, "readwrite");
     tx.objectStore(videoStoreName).put(record);
+    await new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error || new Error("IndexedDB transaction failed."));
+      tx.onabort = () => reject(tx.error || new Error("IndexedDB transaction aborted."));
+    });
+  };
+
+  const deleteVideoRecord = async (id) => {
+    if (db) {
+      await db.deleteVideo(id).catch(() => null);
+      return;
+    }
+
+    const localDb = await openVideoDb();
+    const tx = localDb.transaction(videoStoreName, "readwrite");
+    tx.objectStore(videoStoreName).delete(id);
     await new Promise((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error || new Error("IndexedDB transaction failed."));
@@ -214,12 +313,52 @@ document.addEventListener("DOMContentLoaded", () => {
       clip.playsInline = true;
       clip.preload = "metadata";
 
-      const clipUrl = window.URL.createObjectURL(record.blob);
-      videoState.galleryUrls.set(record.id, clipUrl);
+      const clipUrl = record.data_url || (record.blob ? window.URL.createObjectURL(record.blob) : "");
+      if (record.blob && clipUrl) {
+        videoState.galleryUrls.set(record.id, clipUrl);
+      }
       clip.src = clipUrl;
 
       const meta = document.createElement("div");
       meta.className = "video-card-meta";
+
+      const controls = document.createElement("div");
+      controls.className = "video-card-controls";
+
+      const moreButton = document.createElement("button");
+      moreButton.type = "button";
+      moreButton.className = "video-card-more";
+      moreButton.textContent = "More";
+      moreButton.setAttribute("aria-expanded", "false");
+
+      const menu = document.createElement("div");
+      menu.className = "video-card-menu";
+      menu.hidden = true;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "video-card-delete";
+      deleteButton.textContent = "Delete video";
+
+      const setMenuOpen = (open) => {
+        menu.hidden = !open;
+        moreButton.setAttribute("aria-expanded", String(open));
+        card.classList.toggle("is-menu-open", open);
+      };
+
+      moreButton.addEventListener("click", () => {
+        setMenuOpen(menu.hidden);
+      });
+
+      deleteButton.addEventListener("click", async () => {
+        setMenuOpen(false);
+        await deleteVideoRecord(record.id);
+        updateVideoStatus("Video deleted.");
+        await renderVideoGallery();
+      });
+
+      controls.append(moreButton);
+      menu.append(deleteButton);
 
       const title = document.createElement("p");
       title.className = "video-card-title";
@@ -228,13 +367,13 @@ document.addEventListener("DOMContentLoaded", () => {
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-      }).format(new Date(record.createdAt));
+      }).format(new Date(record.created_at || record.createdAt || Date.now()));
 
       const duration = document.createElement("p");
       duration.className = "video-card-duration";
-      duration.textContent = record.mimeType || "Recorded clip";
+      duration.textContent = record.mime_type || record.mimeType || "Recorded clip";
 
-      meta.append(title, duration);
+      meta.append(title, duration, controls, menu);
       card.append(clip, meta);
       videoGallery.append(card);
     });
@@ -322,10 +461,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const blob = new Blob(videoState.chunks, {
           type: videoState.recorder?.mimeType || mimeType || "video/webm",
         });
+        const dataUrl = await blobToDataUrl(blob);
         const record = {
           id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
           createdAt: Date.now(),
           mimeType: videoState.recorder?.mimeType || mimeType || "video/webm",
+          dataUrl,
           blob,
         };
 
@@ -504,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const setActiveView = (viewName) => {
-    const nextView = viewName === "avatar" || viewName === "videos" || viewName === "art" ? viewName : "board";
+    const nextView = viewName === "avatar" || viewName === "videos" || viewName === "art" || viewName === "levels" ? viewName : "board";
 
     if (videoState.recording && nextView !== "videos") {
       stopVideoRecording();
@@ -544,61 +685,8 @@ document.addEventListener("DOMContentLoaded", () => {
     void startMusic();
   };
 
-  const isUnlocked = (() => {
-    try {
-      return window.sessionStorage.getItem(passwordKey) === "true";
-    } catch {
-      return false;
-    }
-  })();
-
-  if (isUnlocked) {
-    unlockSite();
-  }
-
-  if (passwordInput && gate && !isUnlocked) {
-    passwordInput.focus();
-
-    const submitPassword = () => {
-      const value = passwordInput.value.trim();
-
-      if (value === expectedPassword) {
-        if (passwordError) {
-          passwordError.textContent = "";
-        }
-        unlockSite();
-        return;
-      }
-
-      if (passwordError) {
-        passwordError.textContent = "Wrong password.";
-      }
-      passwordInput.select();
-    };
-
-    passwordInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        submitPassword();
-      }
-    });
-
-    gate.addEventListener("click", (event) => {
-      if (event.target === gate) {
-        passwordInput.focus();
-      }
-    });
-
-    passwordInput.addEventListener("input", () => {
-      if (passwordError && passwordError.textContent) {
-        passwordError.textContent = "";
-      }
-
-      if (passwordInput.value.trim() === expectedPassword) {
-        unlockSite();
-      }
-    });
-  }
+  const isUnlocked = true;
+  unlockSite();
 
   const savedAvatar = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
   applyAvatar(savedAvatar);
@@ -662,28 +750,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.querySelector("#message-form");
   const feed = document.querySelector("#message-feed");
-  const authorSelect = document.querySelector("#message-author");
+  const authorDisplay = document.querySelector("#message-author-name");
   const textArea = document.querySelector("#message-text");
   const membersList = document.querySelector("#members-list");
   const newMembersList = document.querySelector("#new-members-list");
   const hint = document.querySelector(".message-hint");
   const submitButton = document.querySelector(".message-actions button");
 
-  if (!form || !feed || !authorSelect || !textArea || !membersList || !newMembersList || !hint || !submitButton) {
+  if (!form || !feed || !authorDisplay || !textArea || !membersList || !newMembersList || !hint || !submitButton) {
     return;
   }
 
-  const messageStorageKey = "catclub-message-board";
-  const rosterStorageKey = "catclub-roster";
-
-  const initialRoster = {
-    members: ["Izzy", "Lexi", "Olivia", "Eve", "Alison", "Hailey"],
-    newMembers: ["Elise", "Audrey"],
+  const allowedNames = Array.isArray(window.CATCLUB_CONFIG?.allowedMembers)
+    ? window.CATCLUB_CONFIG.allowedMembers
+    : ["Izzy", "Lexi", "Olivia", "Eve", "Alison", "Hailey", "Elise", "Audrey"];
+  const defaultGroupByName = {
+    Izzy: "members",
+    Lexi: "members",
+    Olivia: "members",
+    Eve: "members",
+    Alison: "members",
+    Hailey: "members",
+    Elise: "new_members",
+    Audrey: "new_members",
+  };
+  const defaultLevels = {
+    Izzy: "Leader",
+    Olivia: "Trainer",
+    Lexi: "Trainer",
+    Eve: "Queen",
+    Alison: "Queen",
+    Hailey: "Queen",
+    Elise: "Guard",
+    Audrey: "Noob",
+  };
+  const fallbackAvatar = {
+    avatar_color: "orange",
+    avatar_eyes: "round",
+    avatar_mouth: "smile",
+    avatar_clothes: "hoodie",
   };
 
-  const loadMessages = () => {
+  const formatTime = (value) =>
+    new Intl.DateTimeFormat("en", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(new Date(value));
+
+  const boardState = {
+    profiles: [],
+    messages: [],
+  };
+
+  const getProfileList = async () => {
+    const buildFallbackProfiles = () =>
+      allowedNames.map((name) => ({
+        id: null,
+        name,
+        member_group: defaultGroupByName[name] || "members",
+        level: defaultLevels[name] || "Noob",
+        board_visible: true,
+        ...fallbackAvatar,
+      }));
+
+    if (!db) {
+      return buildFallbackProfiles();
+    }
+
+    const profiles = await db.loadProfiles().catch(() => []);
+    if (!profiles.length) {
+      return buildFallbackProfiles();
+    }
+
+    const byName = new Map(profiles.map((profile) => [profile.name, profile]));
+    const merged = allowedNames.map((name) => {
+      const profile = byName.get(name);
+      if (profile) {
+        return {
+          ...profile,
+          member_group: profile.member_group || defaultGroupByName[name] || "members",
+          board_visible: profile.board_visible !== false,
+          level: profile.level || defaultLevels[name] || "Noob",
+        };
+      }
+
+      return {
+        id: null,
+        name,
+        member_group: defaultGroupByName[name] || "members",
+        level: defaultLevels[name] || "Noob",
+        board_visible: true,
+        ...fallbackAvatar,
+      };
+    });
+
+    const visible = merged.filter((profile) => profile.board_visible !== false);
+    return visible.length ? visible : buildFallbackProfiles();
+  };
+
+  const loadMessages = async () => {
+    if (db) {
+      return db.loadMessages().catch(() => []);
+    }
+
     try {
-      const raw = window.localStorage.getItem(messageStorageKey);
+      const raw = window.localStorage.getItem("catclub-message-board");
       const parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
@@ -691,77 +864,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const saveMessages = (messages) => {
+  const saveLegacyMessages = (messages) => {
     try {
-      window.localStorage.setItem(messageStorageKey, JSON.stringify(messages));
+      window.localStorage.setItem("catclub-message-board", JSON.stringify(messages));
     } catch {
-      // Ignore storage failures so the board still works.
+      // Ignore storage failures so the board still works locally.
     }
   };
 
-  const loadRoster = () => {
-    try {
-      const raw = window.localStorage.getItem(rosterStorageKey);
-      const parsed = raw ? JSON.parse(raw) : null;
-      if (
-        parsed &&
-        Array.isArray(parsed.members) &&
-        Array.isArray(parsed.newMembers)
-      ) {
-        return {
-          members: parsed.members.filter((name) => typeof name === "string" && name.trim()),
-          newMembers: parsed.newMembers.filter((name) => typeof name === "string" && name.trim()),
-        };
-      }
-    } catch {
-      // Fall back to defaults.
-    }
-
-    return {
-      members: [...initialRoster.members],
-      newMembers: [...initialRoster.newMembers],
-    };
-  };
-
-  const normalizeRoster = (roster) => {
-    const nextRoster = {
-      members: [...roster.members],
-      newMembers: [...roster.newMembers],
-    };
-
-    if (!nextRoster.members.includes("Hailey")) {
-      const alisonIndex = nextRoster.members.indexOf("Alison");
-      if (alisonIndex >= 0) {
-        nextRoster.members.splice(alisonIndex + 1, 0, "Hailey");
-      } else {
-        nextRoster.members.push("Hailey");
-      }
-    }
-
-    return nextRoster;
-  };
-
-  const saveRoster = (roster) => {
-    try {
-      window.localStorage.setItem(rosterStorageKey, JSON.stringify(roster));
-    } catch {
-      // Ignore storage failures so the board still works.
-    }
-  };
-
-  const formatTime = (isoString) =>
-    new Intl.DateTimeFormat("en", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(new Date(isoString));
-
-  const renderMessages = () => {
-    const messages = loadMessages();
+  const renderMessages = async () => {
+    const messages = await loadMessages();
+    boardState.messages = messages;
     feed.innerHTML = "";
 
-    if (messages.length === 0) {
+    if (!messages.length) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
       empty.textContent = "No messages yet. Post the first one.";
@@ -769,7 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    for (const message of messages) {
+    messages.forEach((message) => {
       const card = document.createElement("article");
       card.className = "message-card";
 
@@ -778,73 +894,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const author = document.createElement("span");
       author.className = "message-author";
-      author.textContent = message.author;
+      author.textContent = message.author_name || message.author || "Unknown";
 
       const time = document.createElement("time");
       time.className = "message-time";
-      time.dateTime = message.createdAt;
-      time.textContent = formatTime(message.createdAt);
+      time.dateTime = message.created_at || message.createdAt || new Date().toISOString();
+      time.textContent = formatTime(message.created_at || message.createdAt || Date.now());
 
       const body = document.createElement("p");
       body.className = "message-text";
-      body.textContent = message.text;
+      body.textContent = message.body || message.text || "";
 
       meta.append(author, time);
       card.append(meta, body);
       feed.append(card);
-    }
+    });
   };
 
-  const renderRoster = () => {
-    const roster = normalizeRoster(loadRoster());
-    saveRoster(roster);
-    const selectedBeforeRender = authorSelect.value;
+  const renderRoster = async () => {
+    const roster = await getProfileList();
+    boardState.profiles = roster;
+    const grouped = {
+      members: roster.filter((profile) => profile.member_group === "members"),
+      new_members: roster.filter((profile) => profile.member_group === "new_members"),
+    };
+    const currentName =
+      resolvedCurrentProfile?.name ||
+      currentUser?.user_metadata?.name ||
+      currentUser?.email ||
+      allowedNames[0] ||
+      "Unknown";
+    authorDisplay.textContent = currentName;
+    hint.textContent = "Messages post under your signed-in name.";
+    submitButton.disabled = false;
 
-    const currentNames = [...roster.members, ...roster.newMembers];
-    const hasNames = currentNames.length > 0;
-
-    authorSelect.innerHTML = "";
-
-    if (!hasNames) {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "No names available";
-      authorSelect.append(option);
-      authorSelect.disabled = true;
-      submitButton.disabled = true;
-      hint.textContent = "Add a name back to post messages.";
-    } else {
-      authorSelect.disabled = false;
-      submitButton.disabled = false;
-      hint.textContent = "Use any name from the member list.";
-
-      const addGroup = (label, names) => {
-        const group = document.createElement("optgroup");
-        group.label = label;
-
-        names.forEach((name) => {
-          const option = document.createElement("option");
-          option.textContent = name;
-          group.append(option);
-        });
-
-        authorSelect.append(group);
-      };
-
-      addGroup("Members", roster.members);
-      addGroup("New members", roster.newMembers);
-
-      if (currentNames.includes(selectedBeforeRender)) {
-        authorSelect.value = selectedBeforeRender;
-      } else {
-        authorSelect.value = currentNames[0];
-      }
-    }
-
-    const renderList = (listEl, names, sectionKey) => {
+    const renderList = (listEl, profiles, sectionKey) => {
       listEl.innerHTML = "";
 
-      if (names.length === 0) {
+      if (!profiles.length) {
         const empty = document.createElement("li");
         empty.className = "member-empty";
         empty.textContent = "No names yet.";
@@ -852,78 +939,115 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      names.forEach((name) => {
+      profiles.forEach((profile) => {
         const item = document.createElement("li");
         item.className = "member-item";
-        item.dataset.name = name;
+        item.dataset.name = profile.name;
         item.dataset.section = sectionKey;
 
         const nameButton = document.createElement("button");
         nameButton.type = "button";
         nameButton.className = "member-name";
-        nameButton.textContent = name;
-        nameButton.setAttribute("aria-label", `${name}, tap to show remove button`);
+        nameButton.textContent = profile.name;
+        nameButton.setAttribute("aria-label", `${profile.name}, tap to show remove button`);
 
         const removeButton = document.createElement("button");
         removeButton.type = "button";
         removeButton.className = "member-remove";
         removeButton.textContent = "−";
-        removeButton.setAttribute("aria-label", `Remove ${name} from the ${sectionKey === "members" ? "Members" : "New members"} list`);
+        removeButton.setAttribute("aria-label", `Remove ${profile.name} from the ${sectionKey === "members" ? "Members" : "New members"} list`);
 
         const reveal = () => {
           item.classList.toggle("is-revealed");
         };
 
-        const remove = () => {
-          const nextRoster = loadRoster();
-          nextRoster[sectionKey] = nextRoster[sectionKey].filter((entry) => entry !== name);
-          saveRoster(nextRoster);
+        const remove = async () => {
+          if (db && profile.id) {
+            await db.updateProfile(profile.id, { board_visible: false }).catch(() => null);
+          } else {
+            const nextRoster = await getProfileList();
+            const hidden = nextRoster.find((entry) => entry.name === profile.name);
+            if (hidden) {
+              hidden.board_visible = false;
+            }
+          }
 
-          const messages = loadMessages().filter((message) => message.author !== name);
-          saveMessages(messages);
-
-          renderRoster();
-          renderMessages();
+          await renderRoster();
         };
 
         nameButton.addEventListener("click", reveal);
-        removeButton.addEventListener("click", remove);
+        removeButton.addEventListener("click", () => {
+          void remove();
+        });
 
         item.append(nameButton, removeButton);
         listEl.append(item);
       });
     };
 
-    renderList(membersList, roster.members, "members");
-    renderList(newMembersList, roster.newMembers, "newMembers");
+    renderList(membersList, grouped.members, "members");
+    renderList(newMembersList, grouped.new_members, "newMembers");
+
+    window.dispatchEvent(
+      new CustomEvent("catclub-roster-changed", {
+        detail: {
+          members: grouped.members.map((profile) => profile.name),
+          newMembers: grouped.new_members.map((profile) => profile.name),
+        },
+      }),
+    );
   };
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    const author = authorSelect.value.trim();
-    const text = textArea.value.trim();
+    const submit = async () => {
+      const author = (resolvedCurrentProfile?.name || currentUser?.user_metadata?.name || currentUser?.email || "").trim();
+      const text = textArea.value.trim();
 
-    if (!author || !text) {
+      if (!author || !text) {
+        textArea.focus();
+        return;
+      }
+
+      const profile = boardState.profiles.find((entry) => entry.name === author);
+
+      if (db && profile?.id) {
+        await db.addMessage({
+          user_id: profile.id,
+          author_name: profile.name,
+          body: text,
+        });
+      } else {
+        const messages = await loadMessages();
+        messages.unshift({
+          id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          author,
+          text,
+          createdAt: new Date().toISOString(),
+        });
+        saveLegacyMessages(messages);
+      }
+
+      textArea.value = "";
+      await renderMessages();
       textArea.focus();
-      return;
-    }
+    };
 
-    const messages = loadMessages();
-    messages.unshift({
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      author,
-      text,
-      createdAt: new Date().toISOString(),
-    });
-
-    saveMessages(messages);
-    textArea.value = "";
-    renderMessages();
-    textArea.focus();
+    void submit();
   });
 
-  renderRoster();
-  renderMessages();
+  await renderRoster();
+  await renderMessages();
   window.__catClubVideoReady = true;
-});
+  if (shouldRedirectToAuth) {
+    window.location.replace("/auth");
+  }
+  })();
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCatClubBoard, { once: true });
+} else {
+  initCatClubBoard();
+}

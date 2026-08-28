@@ -1,7 +1,9 @@
-document.addEventListener("DOMContentLoaded", () => {
+const initCatClubArt = () => {
   if (window.__catClubArtReady) {
     return;
   }
+
+  window.__catClubArtReady = true;
 
   const artNewButton = document.querySelector("#art-new-button");
   const artStatus = document.querySelector("#art-status");
@@ -27,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const db = window.catclubDb || null;
   const storageKey = "catclub-art-drawings";
   const palette = [
     { name: "Ink", value: "#151515" },
@@ -54,35 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const canvasContext = artCanvas.getContext("2d");
 
-  const loadDrawings = () => {
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      const parsed = raw ? JSON.parse(raw) : [];
-
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
-
-      return parsed.filter(
-        (drawing) =>
-          drawing &&
-          typeof drawing.id === "string" &&
-          typeof drawing.image === "string" &&
-          typeof drawing.createdAt === "number"
-      );
-    } catch {
-      return [];
-    }
-  };
-
-  const saveDrawings = (drawings) => {
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(drawings));
-    } catch {
-      // Keep the gallery usable even if persistence fails.
-    }
-  };
-
   const formatDate = (value) =>
     new Intl.DateTimeFormat("en", {
       month: "short",
@@ -96,6 +70,56 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const colorLabel = (value) => palette.find((item) => item.value === value)?.name || value;
+
+  const loadDrawings = async () => {
+    if (db) {
+      return db.loadDrawings().catch(() => []);
+    }
+
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveLegacyDrawings = (drawings) => {
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(drawings));
+    } catch {
+      // Keep the gallery usable even if persistence fails.
+    }
+  };
+
+  const saveDrawing = async (drawing) => {
+    if (db) {
+      const user = await db.getUser().catch(() => null);
+      await db.addDrawing({
+        user_id: user?.id || null,
+        author_name: user?.user_metadata?.name || user?.email || "Unknown",
+        title: "Cat Club drawing",
+        mime_type: drawing.mimeType || "image/png",
+        data_url: drawing.dataUrl,
+      });
+      return;
+    }
+
+    const drawings = await loadDrawings();
+    drawings.unshift(drawing);
+    saveLegacyDrawings(drawings);
+  };
+
+  const deleteDrawing = async (id) => {
+    if (db) {
+      await db.deleteDrawing(id).catch(() => null);
+      return;
+    }
+
+    const drawings = await loadDrawings();
+    saveLegacyDrawings(drawings.filter((drawing) => drawing.id !== id));
+  };
 
   const updateColorButton = () => {
     artColorButton.style.setProperty("--art-color", state.color);
@@ -127,8 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const renderGallery = () => {
+  const renderGallery = async () => {
     artGallery.innerHTML = "";
+    state.drawings = await loadDrawings().catch(() => []);
 
     if (!state.drawings.length) {
       const empty = document.createElement("p");
@@ -145,8 +170,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const image = document.createElement("img");
       image.className = "art-card-canvas";
-      image.src = drawing.image;
-      image.alt = `Drawing from ${formatDate(drawing.createdAt)}`;
+      image.src = drawing.data_url || drawing.image;
+      image.alt = `Drawing from ${formatDate(drawing.created_at || drawing.createdAt || Date.now())}`;
       image.loading = "lazy";
 
       const meta = document.createElement("div");
@@ -154,13 +179,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const title = document.createElement("p");
       title.className = "art-card-title";
-      title.textContent = formatDate(drawing.createdAt);
+      title.textContent = formatDate(drawing.created_at || drawing.createdAt || Date.now());
 
       const color = document.createElement("p");
       color.className = "art-card-color";
       color.textContent = `Color: ${colorLabel(drawing.color || palette[0].value)}`;
 
-      meta.append(title, color);
+      const controls = document.createElement("div");
+      controls.className = "art-card-controls";
+
+      const moreButton = document.createElement("button");
+      moreButton.type = "button";
+      moreButton.className = "art-card-more";
+      moreButton.textContent = "More";
+      moreButton.setAttribute("aria-expanded", "false");
+
+      const menu = document.createElement("div");
+      menu.className = "art-card-menu";
+      menu.hidden = true;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "art-card-delete";
+      deleteButton.textContent = "Delete drawing";
+
+      const setMenuOpen = (open) => {
+        menu.hidden = !open;
+        moreButton.setAttribute("aria-expanded", String(open));
+        card.classList.toggle("is-menu-open", open);
+      };
+
+      moreButton.addEventListener("click", () => {
+        setMenuOpen(menu.hidden);
+      });
+
+      deleteButton.addEventListener("click", async () => {
+        setMenuOpen(false);
+        await deleteDrawing(drawing.id);
+        setStatus("Drawing deleted.");
+        await renderGallery();
+      });
+
+      controls.append(moreButton);
+      menu.append(deleteButton);
+      meta.append(title, color, controls, menu);
       card.append(image, meta);
       artGallery.append(card);
     });
@@ -259,62 +321,64 @@ document.addEventListener("DOMContentLoaded", () => {
     const point = getCanvasPoint(event);
     canvasContext.lineTo(point.x, point.y);
     canvasContext.stroke();
-    state.hasMarks = true;
   };
 
-  const endStroke = (event) => {
-    if (!state.drawing || event.pointerId !== state.activePointerId) {
+  const endStroke = () => {
+    if (!state.drawing) {
       return;
     }
 
     state.drawing = false;
     state.activePointerId = null;
-    try {
-      artCanvas.releasePointerCapture(event.pointerId);
-    } catch {
-      // Ignore capture release issues.
-    }
-    canvasContext.closePath();
   };
 
-  const saveDrawing = () => {
+  const clearCanvas = () => {
+    const rect = artCanvas.getBoundingClientRect();
+    canvasContext.clearRect(0, 0, rect.width, rect.height);
+    canvasContext.fillStyle = "#ffffff";
+    canvasContext.fillRect(0, 0, rect.width, rect.height);
+    state.hasMarks = false;
+  };
+
+  const saveCurrentDrawing = async () => {
     if (!state.hasMarks) {
-      setStatus("Draw something before saving.");
+      setStatus("Draw something first.");
       return;
     }
 
-    const drawing = {
+    const dataUrl = artCanvas.toDataURL("image/png");
+    const record = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       createdAt: Date.now(),
       color: state.color,
-      image: artCanvas.toDataURL("image/png"),
+      dataUrl,
+      image: dataUrl,
+      mimeType: "image/png",
     };
 
-    state.drawings = [drawing, ...state.drawings];
-    saveDrawings(state.drawings);
-    renderGallery();
-    closeComposer();
+    await saveDrawing(record);
     setStatus("Saved to gallery.");
+    closeComposer();
+    await renderGallery();
   };
 
-  state.drawings = loadDrawings();
-  renderPalette();
-  updateColorButton();
-  renderGallery();
-
-  artNewButton.addEventListener("click", reopenWithBlankCanvas);
-
-  artColorButton.addEventListener("click", () => {
-    const isOpen = !artPalette.hidden;
-    artPalette.hidden = isOpen;
-    artColorButton.setAttribute("aria-expanded", String(!isOpen));
-    if (!isOpen) {
-      renderPalette();
-    }
+  artNewButton.addEventListener("click", () => {
+    reopenWithBlankCanvas();
   });
 
-  artSaveButton.addEventListener("click", saveDrawing);
-  artCloseButton.addEventListener("click", closeComposer);
+  artColorButton.addEventListener("click", () => {
+    const open = artPalette.hidden;
+    artPalette.hidden = !open;
+    artColorButton.setAttribute("aria-expanded", String(open));
+  });
+
+  artSaveButton.addEventListener("click", () => {
+    void saveCurrentDrawing();
+  });
+
+  artCloseButton.addEventListener("click", () => {
+    closeComposer();
+  });
 
   artCanvas.addEventListener("pointerdown", startStroke);
   artCanvas.addEventListener("pointermove", moveStroke);
@@ -324,10 +388,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("resize", () => {
     if (!artComposer.hidden) {
-      const snapshot = state.hasMarks ? artCanvas.toDataURL("image/png") : null;
-      void resizeCanvas(snapshot);
+      void resizeCanvas();
     }
   });
 
-  window.__catClubArtReady = true;
-});
+  renderPalette();
+  updateColorButton();
+  void resizeCanvas();
+  void renderGallery();
+  setStatus("Press + to start a new drawing.");
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCatClubArt, { once: true });
+} else {
+  initCatClubArt();
+}
