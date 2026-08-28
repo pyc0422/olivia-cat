@@ -51,6 +51,7 @@ const initCatClubBoard = () => {
     context: null,
     master: null,
     running: false,
+    enabled: true,
     intervalId: null,
   };
 
@@ -89,12 +90,28 @@ const initCatClubBoard = () => {
     });
   };
 
+  const loadStoredCurrentUser = () => {
+    try {
+      const raw = window.localStorage.getItem("catclub-current-user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
   const db = await waitForSupabaseDb();
+  const storedCurrentUser = loadStoredCurrentUser();
   const authSession = db ? await db.getSession().catch(() => null) : null;
-  const currentUser = db ? await db.getUser().catch(() => null) : null;
-  const currentProfile = db && currentUser ? await db.loadProfiles().then((profiles) => profiles.find((profile) => profile.id === currentUser.id) || null).catch(() => null) : null;
+  const currentUser = db
+    ? await db.getUser().catch(() => storedCurrentUser || null)
+    : storedCurrentUser || null;
+  const canUseRemoteDb = Boolean(authSession && db);
+  const currentProfile =
+    canUseRemoteDb && currentUser
+      ? await db.loadProfiles().then((profiles) => profiles.find((profile) => profile.id === currentUser.id) || null).catch(() => null)
+      : null;
   const resolvedCurrentProfile =
-    db && currentUser
+    canUseRemoteDb && currentUser
       ? currentProfile ||
         (await db
           .ensureProfile({
@@ -112,7 +129,7 @@ const initCatClubBoard = () => {
           .catch(() => null))
       : null;
 
-  const shouldRedirectToAuth = !authSession;
+  const shouldRedirectToAuth = !authSession && !storedCurrentUser;
   if (gate) {
     gate.hidden = true;
   }
@@ -514,8 +531,8 @@ const initCatClubBoard = () => {
       return;
     }
 
-    musicToggle.textContent = musicState.running ? "Music on" : "Music off";
-    musicToggle.setAttribute("aria-pressed", String(musicState.running));
+    musicToggle.textContent = musicState.enabled ? "Music on" : "Music off";
+    musicToggle.setAttribute("aria-pressed", String(musicState.enabled));
   };
 
   const stopMusic = async () => {
@@ -586,7 +603,8 @@ const initCatClubBoard = () => {
 
   const startMusic = async () => {
     const prefs = loadMusicPrefs();
-    if (prefs.enabled === false) {
+    musicState.enabled = prefs.enabled !== false;
+    if (!musicState.enabled) {
       updateMusicToggle();
       return false;
     }
@@ -624,16 +642,24 @@ const initCatClubBoard = () => {
   };
 
   const toggleMusic = async () => {
-    const prefs = loadMusicPrefs();
-
     if (musicState.running) {
+      musicState.enabled = false;
+      updateMusicToggle();
       saveMusicPrefs({ enabled: false });
       await stopMusic();
       return;
     }
 
+    musicState.enabled = true;
+    updateMusicToggle();
     saveMusicPrefs({ enabled: true });
-    await startMusic();
+
+    const started = await startMusic();
+    if (!started) {
+      musicState.enabled = false;
+      saveMusicPrefs({ enabled: false });
+      updateMusicToggle();
+    }
   };
 
   const loadActiveView = () => {
@@ -735,7 +761,10 @@ const initCatClubBoard = () => {
     });
   }
 
-  if (loadMusicPrefs().enabled !== false && isUnlocked) {
+  musicState.enabled = loadMusicPrefs().enabled !== false;
+  updateMusicToggle();
+
+  if (musicState.enabled && isUnlocked) {
     void startMusic();
   } else {
     updateMusicToggle();
@@ -815,7 +844,7 @@ const initCatClubBoard = () => {
         ...fallbackAvatar,
       }));
 
-    if (!db) {
+    if (!canUseRemoteDb) {
       return buildFallbackProfiles();
     }
 
@@ -851,7 +880,7 @@ const initCatClubBoard = () => {
   };
 
   const loadMessages = async () => {
-    if (db) {
+    if (canUseRemoteDb) {
       return db.loadMessages().catch(() => []);
     }
 
@@ -921,7 +950,9 @@ const initCatClubBoard = () => {
     const currentName =
       resolvedCurrentProfile?.name ||
       currentUser?.user_metadata?.name ||
+      currentUser?.name ||
       currentUser?.email ||
+      storedCurrentUser?.name ||
       allowedNames[0] ||
       "Unknown";
     authorDisplay.textContent = currentName;
@@ -1002,7 +1033,13 @@ const initCatClubBoard = () => {
     event.preventDefault();
 
     const submit = async () => {
-      const author = (resolvedCurrentProfile?.name || currentUser?.user_metadata?.name || currentUser?.email || "").trim();
+      const author = (
+        resolvedCurrentProfile?.name ||
+        currentUser?.user_metadata?.name ||
+        currentUser?.email ||
+        storedCurrentUser?.name ||
+        ""
+      ).trim();
       const text = textArea.value.trim();
 
       if (!author || !text) {
@@ -1012,7 +1049,7 @@ const initCatClubBoard = () => {
 
       const profile = boardState.profiles.find((entry) => entry.name === author);
 
-      if (db && profile?.id) {
+      if (canUseRemoteDb && profile?.id) {
         await db.addMessage({
           user_id: profile.id,
           author_name: profile.name,

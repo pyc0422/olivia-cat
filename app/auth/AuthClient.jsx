@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { allowedMembers, allowedNames } from "../../lib/allowed-members";
+import { loadStoredCurrentUser, saveStoredCurrentUser } from "../../lib/current-user-storage";
 import { getSupabaseBrowserClient } from "../../lib/supabase-browser";
 
 const defaultForm = {
@@ -41,6 +42,16 @@ export default function AuthClient({ initialMode = "login" }) {
       }
 
       if (data.session) {
+        const { data: userData } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+        if (userData.user) {
+          saveStoredCurrentUser(userData.user);
+        }
+        router.replace(getHomePath());
+        router.refresh();
+        return;
+      }
+
+      if (loadStoredCurrentUser()) {
         router.replace(getHomePath());
         router.refresh();
         return;
@@ -101,6 +112,11 @@ export default function AuthClient({ initialMode = "login" }) {
       return;
     }
 
+    const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    if (data.user) {
+      saveStoredCurrentUser(data.user);
+    }
+
     router.push(getHomePath());
     router.refresh();
   };
@@ -139,6 +155,21 @@ export default function AuthClient({ initialMode = "login" }) {
       setError(authError.message);
       setBusy(false);
       return;
+    }
+
+    const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    if (data.user) {
+      saveStoredCurrentUser(data.user);
+    } else {
+      saveStoredCurrentUser({
+        id: form.email,
+        email: form.email,
+        user_metadata: {
+          name: form.name,
+          phone: form.phone || null,
+          member_group: allowedMembers.find((member) => member.name === form.name)?.group || "members",
+        },
+      });
     }
 
     setMessage("Check your email to verify the account, then sign in.");
@@ -182,6 +213,11 @@ export default function AuthClient({ initialMode = "login" }) {
       setError(authError.message);
       setBusy(false);
       return;
+    }
+
+    const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+    if (data.user) {
+      saveStoredCurrentUser(data.user);
     }
 
     setMessage("Password updated. You can sign in now.");

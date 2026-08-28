@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { getSupabaseBrowserClient } from "../lib/supabase-browser";
+import { loadStoredCurrentUser, saveStoredCurrentUser } from "../lib/current-user-storage";
 
 export default function SupabaseBridge() {
   useEffect(() => {
@@ -14,8 +15,8 @@ export default function SupabaseBridge() {
 
     window.catclubSupabase = client;
     window.catclubDb = {
-      currentUserId: null,
-      currentUserName: null,
+      currentUserId: loadStoredCurrentUser()?.id || null,
+      currentUserName: loadStoredCurrentUser()?.name || null,
       async getSession() {
         const { data } = await client.auth.getSession();
         return data.session || null;
@@ -27,6 +28,9 @@ export default function SupabaseBridge() {
         }
         window.catclubDb.currentUserId = data.user?.id || null;
         window.catclubDb.currentUserName = data.user?.user_metadata?.name || data.user?.email || null;
+        if (data.user) {
+          saveStoredCurrentUser(data.user);
+        }
         return data.user || null;
       },
       async ensureProfile(profile) {
@@ -191,6 +195,9 @@ export default function SupabaseBridge() {
     void userPromise.then(({ data }) => {
       window.catclubDb.currentUserId = data.user?.id || null;
       window.catclubDb.currentUserName = data.user?.user_metadata?.name || data.user?.email || null;
+      if (data.user) {
+        saveStoredCurrentUser(data.user);
+      }
     });
     window.dispatchEvent(new Event("catclub-supabase-ready"));
   }, []);
