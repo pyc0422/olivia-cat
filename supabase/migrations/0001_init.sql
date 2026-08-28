@@ -27,10 +27,13 @@ create table if not exists profiles (
   member_group text not null check (member_group in ('members', 'new_members')),
   board_visible boolean not null default true,
   level text not null default 'Noob' check (level in ('Noob', 'Kitten', 'Warrior', 'Guard', 'Queen', 'Trainer', 'Leader')),
+  kitty_bucks integer not null default 0,
+  avatar_unlocks jsonb not null default '{}'::jsonb,
   avatar_color text not null default 'orange',
   avatar_eyes text not null default 'round',
   avatar_mouth text not null default 'smile',
   avatar_clothes text not null default 'hoodie',
+  avatar_accessory text not null default 'none',
   last_login_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -38,6 +41,12 @@ create table if not exists profiles (
 
 alter table if exists profiles
 add column if not exists board_visible boolean not null default true;
+alter table if exists profiles
+add column if not exists kitty_bucks integer not null default 0;
+alter table if exists profiles
+add column if not exists avatar_unlocks jsonb not null default '{}'::jsonb;
+alter table if exists profiles
+add column if not exists avatar_accessory text not null default 'none';
 
 create table if not exists messages (
   id uuid primary key default gen_random_uuid(),
@@ -101,10 +110,13 @@ begin
     member_group,
     board_visible,
     level,
+    kitty_bucks,
+    avatar_unlocks,
     avatar_color,
     avatar_eyes,
     avatar_mouth,
     avatar_clothes,
+    avatar_accessory,
     last_login_at
   )
   values (
@@ -115,10 +127,13 @@ begin
     coalesce(new.raw_user_meta_data ->> 'member_group', 'members'),
     true,
     coalesce(new.raw_user_meta_data ->> 'level', 'Noob'),
+    coalesce((new.raw_user_meta_data ->> 'kitty_bucks')::integer, 0),
+    coalesce(new.raw_user_meta_data -> 'avatar_unlocks', '{}'::jsonb),
     coalesce(new.raw_user_meta_data ->> 'avatar_color', 'orange'),
     coalesce(new.raw_user_meta_data ->> 'avatar_eyes', 'round'),
     coalesce(new.raw_user_meta_data ->> 'avatar_mouth', 'smile'),
     coalesce(new.raw_user_meta_data ->> 'avatar_clothes', 'hoodie'),
+    coalesce(new.raw_user_meta_data ->> 'avatar_accessory', 'none'),
     now()
   )
   on conflict (id) do update
@@ -127,10 +142,13 @@ begin
       phone = excluded.phone,
       member_group = excluded.member_group,
       level = excluded.level,
+      kitty_bucks = excluded.kitty_bucks,
+      avatar_unlocks = excluded.avatar_unlocks,
       avatar_color = excluded.avatar_color,
       avatar_eyes = excluded.avatar_eyes,
       avatar_mouth = excluded.avatar_mouth,
       avatar_clothes = excluded.avatar_clothes,
+      avatar_accessory = excluded.avatar_accessory,
       last_login_at = excluded.last_login_at,
       updated_at = now();
 

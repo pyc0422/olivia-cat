@@ -13,8 +13,14 @@ const initCatClubBoard = () => {
   const tabButtons = [...document.querySelectorAll(".view-tab[data-view-target]")];
   const musicToggle = document.querySelector("[data-music-toggle]");
   const siteViews = [...document.querySelectorAll(".site-view[data-view-panel]")];
+  const savedAvatarStage = document.querySelector("#saved-avatar-stage");
   const avatarStage = document.querySelector("#avatar-stage");
+  const avatarBucks = document.querySelector("#avatar-bucks");
+  const avatarStatus = document.querySelector("#avatar-status");
+  const avatarSaveButton = document.querySelector("#avatar-save-button");
   const avatarButtons = [...document.querySelectorAll(".avatar-option[data-avatar-setting]")];
+  const shopBalance = document.querySelector("#shop-balance");
+  const shopBuyButtons = [...document.querySelectorAll("[data-shop-buy]")];
   const videoRecordButton = document.querySelector("#video-record-button");
   const videoPreview = document.querySelector("#video-preview");
   const videoGallery = document.querySelector("#video-gallery");
@@ -32,14 +38,61 @@ const initCatClubBoard = () => {
     eyes: "round",
     mouth: "smile",
     clothes: "hoodie",
+    accessory: "none",
   };
 
-  const allowedAvatarOptions = {
-    color: ["orange", "cream", "gray", "mint", "pink"],
-    eyes: ["round", "sleepy", "sparkle", "wink", "star"],
-    mouth: ["smile", "tiny", "open", "tongue", "shy"],
-    clothes: ["none", "tee", "hoodie", "scarf", "bow"],
+  const avatarCatalog = {
+    color: [
+      { value: "orange", label: "Orange", cost: 0 },
+      { value: "cream", label: "Cream", cost: 0 },
+      { value: "gray", label: "Gray", cost: 0 },
+      { value: "mint", label: "Mint", cost: 0 },
+      { value: "pink", label: "Pink", cost: 0 },
+      { value: "sky", label: "Sky", cost: 3, lockedFor: ["new_members"] },
+      { value: "cocoa", label: "Cocoa", cost: 4, lockedFor: ["new_members"] },
+      { value: "sunset", label: "Sunset", cost: 5, lockedFor: ["new_members"] },
+    ],
+    eyes: [
+      { value: "round", label: "Round", cost: 0 },
+      { value: "sleepy", label: "Sleepy", cost: 0 },
+      { value: "sparkle", label: "Sparkle", cost: 0 },
+      { value: "wink", label: "Wink", cost: 0 },
+      { value: "star", label: "Star", cost: 0 },
+      { value: "heart", label: "Heart", cost: 3, lockedFor: ["new_members"] },
+      { value: "moon", label: "Moon", cost: 4, lockedFor: ["new_members"] },
+    ],
+    mouth: [
+      { value: "smile", label: "Smile", cost: 0 },
+      { value: "tiny", label: "Tiny", cost: 0 },
+      { value: "open", label: "Open", cost: 0 },
+      { value: "tongue", label: "Tongue", cost: 0 },
+      { value: "shy", label: "Shy", cost: 0 },
+      { value: "grin", label: "Grin", cost: 3, lockedFor: ["new_members"] },
+      { value: "meow", label: "Meow", cost: 4, lockedFor: ["new_members"] },
+    ],
+    clothes: [
+      { value: "none", label: "None", cost: 0 },
+      { value: "tee", label: "Tee", cost: 0 },
+      { value: "hoodie", label: "Hoodie", cost: 0 },
+      { value: "scarf", label: "Scarf", cost: 0 },
+      { value: "bow", label: "Bow", cost: 0 },
+      { value: "vest", label: "Vest", cost: 4, lockedFor: ["new_members"] },
+      { value: "raincoat", label: "Raincoat", cost: 5, lockedFor: ["new_members"] },
+      { value: "dress", label: "Dress", cost: 5, lockedFor: ["new_members"] },
+    ],
+    accessory: [
+      { value: "none", label: "None", cost: 0 },
+      { value: "bowtie", label: "Bow tie", cost: 2 },
+      { value: "glasses", label: "Glasses", cost: 3 },
+      { value: "flower", label: "Flower", cost: 2 },
+      { value: "crown", label: "Crown", cost: 4, lockedFor: ["new_members"] },
+      { value: "necklace", label: "Necklace", cost: 3, lockedFor: ["new_members"] },
+      { value: "backpack", label: "Backpack", cost: 5, lockedFor: ["new_members"] },
+    ],
   };
+  const allowedAvatarOptions = Object.fromEntries(
+    Object.entries(avatarCatalog).map(([key, items]) => [key, items.map((item) => item.value)]),
+  );
   const ambientProgression = [
     [196.0, 246.94, 293.66, 392.0],
     [174.61, 220.0, 261.63, 329.63],
@@ -120,16 +173,21 @@ const initCatClubBoard = () => {
             phone: currentUser.user_metadata?.phone || null,
             member_group: currentUser.user_metadata?.member_group || "members",
             level: currentUser.user_metadata?.level || "Noob",
+            kitty_bucks: currentUser.user_metadata?.kitty_bucks || 0,
+            avatar_unlocks: currentUser.user_metadata?.avatar_unlocks || {},
             avatar_color: currentUser.user_metadata?.avatar_color || "orange",
             avatar_eyes: currentUser.user_metadata?.avatar_eyes || "round",
             avatar_mouth: currentUser.user_metadata?.avatar_mouth || "smile",
             avatar_clothes: currentUser.user_metadata?.avatar_clothes || "hoodie",
+            avatar_accessory: currentUser.user_metadata?.avatar_accessory || "none",
             board_visible: true,
           })
           .catch(() => null))
       : null;
 
-  const shouldRedirectToAuth = !authSession && !storedCurrentUser;
+  const currentAccount = resolvedCurrentProfile || currentProfile || storedCurrentUser || currentUser || null;
+  const shouldRedirectToAuth =
+    window.location.protocol !== "file:" && !authSession && !storedCurrentUser;
   if (gate) {
     gate.hidden = true;
   }
@@ -151,6 +209,58 @@ const initCatClubBoard = () => {
     }
   };
 
+  const loadCurrentUserSnapshot = () => {
+    try {
+      const raw = window.localStorage.getItem("catclub-current-user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const saveCurrentUserSnapshot = (patch) => {
+    try {
+      const current = loadCurrentUserSnapshot() || {};
+      const next = {
+        ...current,
+        ...patch,
+        user_metadata: {
+          ...(current.user_metadata || {}),
+          ...(patch?.user_metadata || {}),
+        },
+      };
+
+      window.localStorage.setItem("catclub-current-user", JSON.stringify(next));
+      return next;
+    } catch {
+      return null;
+    }
+  };
+
+  const normalizeAvatarUnlocks = (value) => {
+    const base = {
+      color: [],
+      eyes: [],
+      mouth: [],
+      clothes: [],
+      accessory: [],
+    };
+
+    if (!value || typeof value !== "object") {
+      return base;
+    }
+
+    for (const key of Object.keys(base)) {
+      const list = Array.isArray(value[key]) ? value[key] : [];
+      base[key] = [...new Set(list.filter((entry) => typeof entry === "string"))];
+    }
+
+    return base;
+  };
+
+  const getAvatarOptionMeta = (setting, value) =>
+    avatarCatalog[setting]?.find((item) => item.value === value) || null;
+
   const normalizeAvatar = (value) => {
     const next = { ...avatarDefaults, ...(value && typeof value === "object" ? value : {}) };
 
@@ -163,6 +273,136 @@ const initCatClubBoard = () => {
     return next;
   };
 
+  const avatarState = {
+    memberGroup: currentAccount?.member_group || "members",
+    kittyBucks: Number(currentAccount?.kitty_bucks || 0),
+    unlocks: normalizeAvatarUnlocks(currentAccount?.avatar_unlocks),
+    status: "",
+  };
+
+  const renderSavedAvatarBadge = (avatar = loadJson(avatarKey, avatarDefaults)) => {
+    const state = normalizeAvatar(avatar);
+
+    if (savedAvatarStage) {
+      savedAvatarStage.dataset.color = state.color;
+      savedAvatarStage.dataset.eyes = state.eyes;
+      savedAvatarStage.dataset.mouth = state.mouth;
+      savedAvatarStage.dataset.clothes = state.clothes;
+      savedAvatarStage.dataset.accessory = state.accessory;
+    }
+  };
+
+  const persistAvatarEconomy = async (avatar = loadJson(avatarKey, avatarDefaults)) => {
+    const snapshot = {
+      id: currentAccount?.id || currentUser?.id || storedCurrentUser?.id || null,
+      name:
+        currentAccount?.name ||
+        currentUser?.user_metadata?.name ||
+        currentUser?.email ||
+        storedCurrentUser?.name ||
+        "Unknown",
+      email: currentAccount?.email || currentUser?.email || storedCurrentUser?.email || "",
+      member_group: avatarState.memberGroup,
+      level: currentAccount?.level || currentUser?.user_metadata?.level || storedCurrentUser?.level || "Noob",
+      kitty_bucks: avatarState.kittyBucks,
+      avatar_unlocks: avatarState.unlocks,
+      user_metadata: {
+        name:
+          currentAccount?.name ||
+          currentUser?.user_metadata?.name ||
+          currentUser?.email ||
+          storedCurrentUser?.name ||
+          "Unknown",
+        member_group: avatarState.memberGroup,
+        level: currentAccount?.level || currentUser?.user_metadata?.level || storedCurrentUser?.level || "Noob",
+        kitty_bucks: avatarState.kittyBucks,
+        avatar_unlocks: avatarState.unlocks,
+        avatar_color: avatar.color,
+        avatar_eyes: avatar.eyes,
+        avatar_mouth: avatar.mouth,
+        avatar_clothes: avatar.clothes,
+        avatar_accessory: avatar.accessory,
+      },
+      avatar_color: avatar.color,
+      avatar_eyes: avatar.eyes,
+      avatar_mouth: avatar.mouth,
+      avatar_clothes: avatar.clothes,
+      avatar_accessory: avatar.accessory,
+    };
+
+    saveCurrentUserSnapshot(snapshot);
+
+    if (canUseRemoteDb && currentAccount?.id) {
+      await db
+        .updateProfile(currentAccount.id, {
+          kitty_bucks: avatarState.kittyBucks,
+          avatar_unlocks: avatarState.unlocks,
+          avatar_color: avatar.color,
+          avatar_eyes: avatar.eyes,
+          avatar_mouth: avatar.mouth,
+          avatar_clothes: avatar.clothes,
+          avatar_accessory: avatar.accessory,
+        })
+        .catch(() => null);
+    }
+  };
+
+  const setAvatarStatus = (message) => {
+    avatarState.status = message;
+    if (avatarStatus) {
+      avatarStatus.textContent = message;
+    }
+  };
+
+  const renderAvatarEconomy = () => {
+    if (avatarBucks) {
+      avatarBucks.textContent = String(avatarState.kittyBucks);
+    }
+
+    if (avatarStatus && !avatarState.status) {
+      avatarStatus.textContent =
+        avatarState.memberGroup === "new_members"
+          ? "Locked items cost Kitty Bucks. Post messages to earn more."
+          : "You can buy special items with Kitty Bucks.";
+    }
+  };
+
+  const isAvatarUnlocked = (setting, value) => {
+    const option = getAvatarOptionMeta(setting, value);
+    if (!option || !option.lockedFor?.includes("new_members")) {
+      return true;
+    }
+
+    if (avatarState.memberGroup !== "new_members") {
+      return true;
+    }
+
+    return avatarState.unlocks[setting]?.includes(value) || false;
+  };
+
+  const syncAvatarButtons = () => {
+      avatarButtons.forEach((button) => {
+      const setting = button.dataset.avatarSetting;
+      const value = button.dataset.avatarValue;
+      const option = setting && value ? getAvatarOptionMeta(setting, value) : null;
+      const locked = Boolean(option?.lockedFor?.includes("new_members") && avatarState.memberGroup === "new_members" && !isAvatarUnlocked(setting, value));
+      const cost = option?.cost || 0;
+
+      button.classList.toggle("is-locked", locked);
+      button.dataset.avatarCost = cost ? String(cost) : "";
+      button.dataset.avatarLockLabel = locked ? `${cost} Kitty Bucks` : "";
+      button.dataset.avatarUnlock = locked ? "new_members" : "";
+      button.setAttribute("aria-disabled", String(false));
+      if (button.dataset.avatarLockLabel) {
+        button.setAttribute("data-avatar-lock-label", button.dataset.avatarLockLabel);
+      } else {
+        button.removeAttribute("data-avatar-lock-label");
+      }
+    });
+
+    syncShopButtons();
+  };
+
   const applyAvatar = (avatar) => {
     const state = normalizeAvatar(avatar);
 
@@ -171,6 +411,7 @@ const initCatClubBoard = () => {
       avatarStage.dataset.eyes = state.eyes;
       avatarStage.dataset.mouth = state.mouth;
       avatarStage.dataset.clothes = state.clothes;
+      avatarStage.dataset.accessory = state.accessory;
     }
 
     avatarButtons.forEach((button) => {
@@ -181,7 +422,32 @@ const initCatClubBoard = () => {
       button.setAttribute("aria-pressed", String(isActive));
     });
 
+    syncAvatarButtons();
+    renderAvatarEconomy();
+    renderSavedAvatarBadge(state);
+
     return state;
+  };
+
+  const syncShopButtons = (avatar = loadJson(avatarKey, avatarDefaults)) => {
+    const normalizedAvatar = normalizeAvatar(avatar);
+
+    shopBuyButtons.forEach((button) => {
+      const value = button.dataset.shopBuy;
+      const option = getAvatarOptionMeta("accessory", value);
+      const unlocked = isAvatarUnlocked("accessory", value);
+      const cost = Number(button.dataset.shopCost || option?.cost || 0);
+      const canAfford = avatarState.kittyBucks >= cost;
+      const selected = normalizedAvatar.accessory === value;
+
+      button.disabled = false;
+      button.dataset.shopState = unlocked ? "owned" : canAfford ? "buy" : "locked";
+      button.textContent = unlocked ? (selected ? "Equipped" : "Equip") : canAfford ? "Buy" : `Need ${cost}`;
+    });
+
+    if (shopBalance) {
+      shopBalance.textContent = String(avatarState.kittyBucks);
+    }
   };
 
   const loadMusicPrefs = () => loadJson(musicKey, { enabled: true });
@@ -671,7 +937,10 @@ const initCatClubBoard = () => {
   };
 
   const setActiveView = (viewName) => {
-    const nextView = viewName === "avatar" || viewName === "videos" || viewName === "art" || viewName === "levels" ? viewName : "board";
+    const nextView =
+      viewName === "avatar" || viewName === "shop" || viewName === "videos" || viewName === "art" || viewName === "levels"
+        ? viewName
+        : "board";
 
     if (videoState.recording && nextView !== "videos") {
       stopVideoRecording();
@@ -716,9 +985,13 @@ const initCatClubBoard = () => {
 
   const savedAvatar = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
   applyAvatar(savedAvatar);
+  renderSavedAvatarBadge(savedAvatar);
+  syncShopButtons();
 
   tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       setActiveView(button.dataset.viewTarget);
     });
   });
@@ -740,7 +1013,9 @@ const initCatClubBoard = () => {
 
   const avatarPanel = siteViews.find((panel) => panel.dataset.viewPanel === "avatar");
   if (avatarPanel) {
-    avatarPanel.addEventListener("click", (event) => {
+    avatarPanel.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const button = event.target.closest(".avatar-option[data-avatar-setting]");
       if (!button) {
         return;
@@ -752,12 +1027,84 @@ const initCatClubBoard = () => {
         return;
       }
 
-      const nextAvatar = applyAvatar({
+      const option = getAvatarOptionMeta(setting, value);
+      const nextAvatar = normalizeAvatar({
         ...loadJson(avatarKey, avatarDefaults),
         [setting]: value,
       });
+      const lockedForNewMembers = Boolean(option?.lockedFor?.includes("new_members") && avatarState.memberGroup === "new_members");
+      const alreadyUnlocked = isAvatarUnlocked(setting, value);
 
-      saveJson(avatarKey, nextAvatar);
+      if (lockedForNewMembers && !alreadyUnlocked) {
+        const cost = option?.cost || 0;
+        if (avatarState.kittyBucks < cost) {
+          setAvatarStatus(`Need ${cost} Kitty Bucks to unlock ${option?.label || value}.`);
+          return;
+        }
+
+        avatarState.kittyBucks -= cost;
+        avatarState.unlocks[setting] = [...new Set([...(avatarState.unlocks[setting] || []), value])];
+        saveJson(avatarKey, applyAvatar(nextAvatar));
+        await persistAvatarEconomy(nextAvatar);
+        setAvatarStatus(`Unlocked ${option?.label || value} for ${cost} Kitty Bucks.`);
+        return;
+      }
+
+      saveJson(avatarKey, applyAvatar(nextAvatar));
+      await persistAvatarEconomy(nextAvatar);
+      setAvatarStatus(`Changed ${option?.label || value}.`);
+    });
+  }
+
+  if (avatarSaveButton) {
+    avatarSaveButton.addEventListener("click", async () => {
+      const saved = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
+      saveJson(avatarKey, saved);
+      renderSavedAvatarBadge(saved);
+      setAvatarStatus("Saved your avatar to the top-left badge.");
+      await persistAvatarEconomy(saved);
+    });
+  }
+
+  const shopPanel = siteViews.find((panel) => panel.dataset.viewPanel === "shop");
+  if (shopPanel) {
+    shopPanel.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const button = event.target.closest("[data-shop-buy]");
+      if (!button) {
+        return;
+      }
+
+      const value = button.dataset.shopBuy;
+      if (!value) {
+        return;
+      }
+
+      const option = getAvatarOptionMeta("accessory", value);
+      const cost = Number(button.dataset.shopCost || option?.cost || 0);
+      const currentAvatar = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
+      const alreadyUnlocked = isAvatarUnlocked("accessory", value);
+
+      if (!alreadyUnlocked && avatarState.kittyBucks < cost) {
+        setAvatarStatus(`Need ${cost} Kitty Bucks to buy ${option?.label || value}.`);
+        return;
+      }
+
+      if (!alreadyUnlocked) {
+        avatarState.kittyBucks -= cost;
+        avatarState.unlocks.accessory = [...new Set([...(avatarState.unlocks.accessory || []), value])];
+        currentAvatar.accessory = value;
+        saveJson(avatarKey, applyAvatar(currentAvatar));
+        await persistAvatarEconomy(currentAvatar);
+        setAvatarStatus(`Bought ${option?.label || value} for ${cost} Kitty Bucks.`);
+        return;
+      }
+
+      currentAvatar.accessory = value;
+      saveJson(avatarKey, applyAvatar(currentAvatar));
+      await persistAvatarEconomy(currentAvatar);
+      setAvatarStatus(`Equipped ${option?.label || value}.`);
     });
   }
 
@@ -1055,6 +1402,9 @@ const initCatClubBoard = () => {
           author_name: profile.name,
           body: text,
         });
+        avatarState.kittyBucks += 1;
+        await persistAvatarEconomy(loadJson(avatarKey, avatarDefaults));
+        setAvatarStatus("You earned 1 Kitty Buck.");
       } else {
         const messages = await loadMessages();
         messages.unshift({
@@ -1064,6 +1414,13 @@ const initCatClubBoard = () => {
           createdAt: new Date().toISOString(),
         });
         saveLegacyMessages(messages);
+        avatarState.kittyBucks += 1;
+        saveCurrentUserSnapshot({
+          kitty_bucks: avatarState.kittyBucks,
+          avatar_unlocks: avatarState.unlocks,
+        });
+        renderAvatarEconomy();
+        setAvatarStatus("You earned 1 Kitty Buck.");
       }
 
       textArea.value = "";

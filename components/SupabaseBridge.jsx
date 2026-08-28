@@ -52,10 +52,13 @@ export default function SupabaseBridge() {
           member_group: profile.member_group,
           board_visible: profile.board_visible ?? true,
           level: profile.level || "Noob",
+          kitty_bucks: Number.isFinite(profile.kitty_bucks) ? profile.kitty_bucks : Number(profile.kitty_bucks || 0),
+          avatar_unlocks: profile.avatar_unlocks || {},
           avatar_color: profile.avatar_color || "orange",
           avatar_eyes: profile.avatar_eyes || "round",
           avatar_mouth: profile.avatar_mouth || "smile",
           avatar_clothes: profile.avatar_clothes || "hoodie",
+          avatar_accessory: profile.avatar_accessory || "none",
           last_login_at: new Date().toISOString(),
         };
 

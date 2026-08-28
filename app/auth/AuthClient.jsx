@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { allowedMembers, allowedNames } from "../../lib/allowed-members";
+import { allowedMembers, allowedNames, getAllowedMember } from "../../lib/allowed-members";
 import { loadStoredCurrentUser, saveStoredCurrentUser } from "../../lib/current-user-storage";
 import { getSupabaseBrowserClient } from "../../lib/supabase-browser";
 
@@ -139,6 +139,8 @@ export default function AuthClient({ initialMode = "login" }) {
       return;
     }
 
+    const member = getAllowedMember(form.name);
+
     const { error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -146,7 +148,9 @@ export default function AuthClient({ initialMode = "login" }) {
         data: {
           name: form.name,
           phone: form.phone || null,
-          member_group: allowedMembers.find((member) => member.name === form.name)?.group || "members",
+          member_group: member?.group || "members",
+          level: member?.level || "Noob",
+          avatar_accessory: "none",
         },
       },
     });
@@ -167,7 +171,11 @@ export default function AuthClient({ initialMode = "login" }) {
         user_metadata: {
           name: form.name,
           phone: form.phone || null,
-          member_group: allowedMembers.find((member) => member.name === form.name)?.group || "members",
+          member_group: member?.group || "members",
+          level: member?.level || "Noob",
+          kitty_bucks: 0,
+          avatar_unlocks: {},
+          avatar_accessory: "none",
         },
       });
     }

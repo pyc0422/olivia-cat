@@ -19,6 +19,37 @@
     <main class="page">
       <section class="poster" id="site-poster" aria-label="Cat Club website draft">
         <header class="masthead">
+          <div class="saved-avatar-badge" aria-label="Saved avatar">
+            <p class="saved-avatar-label">Your cat</p>
+            <div
+              class="avatar-stage saved-avatar-stage"
+              id="saved-avatar-stage"
+              data-color="orange"
+              data-eyes="round"
+              data-mouth="smile"
+              data-clothes="hoodie"
+              data-accessory="none"
+            >
+              <div class="avatar-cat" aria-hidden="true">
+                <span class="avatar-ear avatar-ear-left" aria-hidden="true"></span>
+                <span class="avatar-ear avatar-ear-right" aria-hidden="true"></span>
+                <span class="avatar-face" aria-hidden="true">
+                  <span class="avatar-eye avatar-eye-left"></span>
+                  <span class="avatar-eye avatar-eye-right"></span>
+                  <span class="avatar-blush avatar-blush-left"></span>
+                  <span class="avatar-blush avatar-blush-right"></span>
+                  <span class="avatar-nose"></span>
+                  <span class="avatar-mouth"></span>
+                  <span class="avatar-whisker avatar-whisker-left"></span>
+                  <span class="avatar-whisker avatar-whisker-right"></span>
+                </span>
+                <span class="avatar-accessory"></span>
+                <span class="avatar-clothes"></span>
+                <span class="avatar-tail"></span>
+              </div>
+            </div>
+          </div>
+
           <div class="logo-mark" aria-hidden="true">
             <span></span>
             <span></span>
@@ -33,6 +64,7 @@
         <nav class="site-tabs" aria-label="Cat Club sections">
           <button class="view-tab is-active" type="button" data-view-target="board" aria-pressed="true">Board</button>
           <button class="view-tab view-tab-avatar" type="button" data-view-target="avatar" aria-pressed="false">Avatar</button>
+          <button class="view-tab view-tab-shop" type="button" data-view-target="shop" aria-pressed="false">Shop</button>
           <button class="view-tab view-tab-video" type="button" data-view-target="videos" aria-pressed="false">Videos</button>
           <button class="view-tab view-tab-art" type="button" data-view-target="art" aria-pressed="false">Art</button>
           <button class="view-tab view-tab-levels" type="button" data-view-target="levels" aria-pressed="false">Levels</button>
@@ -142,6 +174,12 @@
                 <p class="avatar-kicker">Avatar</p>
                 <h2 class="avatar-title">Cute cat maker</h2>
                 <p class="avatar-note">Change the color, eyes, mouth, and clothes.</p>
+                <div class="avatar-economy" aria-live="polite">
+                  <span class="avatar-bucks-label">Kitty Bucks</span>
+                  <span class="avatar-bucks-value" id="avatar-bucks">0</span>
+                  <span class="avatar-economy-note" id="avatar-status">Post messages to earn bucks and unlock new items.</span>
+                </div>
+                <button class="avatar-save-button" id="avatar-save-button" type="button" aria-label="Save avatar">✓ Save avatar</button>
               </div>
 
               <div class="avatar-grid">
@@ -185,6 +223,9 @@
                       <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="gray"><span aria-hidden="true"></span>Gray</button>
                       <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="mint"><span aria-hidden="true"></span>Mint</button>
                       <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="pink"><span aria-hidden="true"></span>Pink</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="sky" data-avatar-lock="new_members" data-avatar-cost="3" data-avatar-lock-label="3 Kitty Bucks"><span aria-hidden="true"></span>Sky</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="cocoa" data-avatar-lock="new_members" data-avatar-cost="4" data-avatar-lock-label="4 Kitty Bucks"><span aria-hidden="true"></span>Cocoa</button>
+                      <button class="avatar-option avatar-swatch" type="button" data-avatar-setting="color" data-avatar-value="sunset" data-avatar-lock="new_members" data-avatar-cost="5" data-avatar-lock-label="5 Kitty Bucks"><span aria-hidden="true"></span>Sunset</button>
                     </div>
                   </div>
 
@@ -196,6 +237,8 @@
                       <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="sparkle">Sparkle</button>
                       <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="wink">Wink</button>
                       <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="star">Star</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="heart" data-avatar-lock="new_members" data-avatar-cost="3" data-avatar-lock-label="3 Kitty Bucks">Heart</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="eyes" data-avatar-value="moon" data-avatar-lock="new_members" data-avatar-cost="4" data-avatar-lock-label="4 Kitty Bucks">Moon</button>
                     </div>
                   </div>
 
@@ -207,6 +250,8 @@
                       <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="open">Open</button>
                       <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="tongue">Tongue</button>
                       <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="shy">Shy</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="grin" data-avatar-lock="new_members" data-avatar-cost="3" data-avatar-lock-label="3 Kitty Bucks">Grin</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="mouth" data-avatar-value="meow" data-avatar-lock="new_members" data-avatar-cost="4" data-avatar-lock-label="4 Kitty Bucks">Meow</button>
                     </div>
                   </div>
 
@@ -218,9 +263,79 @@
                       <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="hoodie">Hoodie</button>
                       <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="scarf">Scarf</button>
                       <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="bow">Bow</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="vest" data-avatar-lock="new_members" data-avatar-cost="4" data-avatar-lock-label="4 Kitty Bucks">Vest</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="raincoat" data-avatar-lock="new_members" data-avatar-cost="5" data-avatar-lock-label="5 Kitty Bucks">Raincoat</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="clothes" data-avatar-value="dress" data-avatar-lock="new_members" data-avatar-cost="5" data-avatar-lock-label="5 Kitty Bucks">Dress</button>
+                    </div>
+                  </div>
+
+                  <div class="avatar-control-group">
+                    <p class="avatar-control-title">Accessories</p>
+                    <div class="avatar-options" data-avatar-group="accessory">
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="none">None</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="bowtie">Bow tie</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="glasses">Glasses</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="flower">Flower</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="crown" data-avatar-lock="new_members" data-avatar-cost="4" data-avatar-lock-label="4 Kitty Bucks">Crown</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="necklace" data-avatar-lock="new_members" data-avatar-cost="3" data-avatar-lock-label="3 Kitty Bucks">Necklace</button>
+                      <button class="avatar-option" type="button" data-avatar-setting="accessory" data-avatar-value="backpack" data-avatar-lock="new_members" data-avatar-cost="5" data-avatar-lock-label="5 Kitty Bucks">Backpack</button>
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-shop" data-view-panel="shop" hidden>
+            <section class="shop-studio cat-box" aria-label="Shop">
+              <div class="shop-copy">
+                <p class="shop-kicker">Shop</p>
+                <h2 class="shop-title">Accessories for your cat</h2>
+                <p class="shop-note">Buy accessories with Kitty Bucks, then equip them in the avatar maker.</p>
+              </div>
+
+              <div class="shop-balance" aria-live="polite">
+                <span class="shop-balance-label">Kitty Bucks</span>
+                <span class="shop-balance-value" id="shop-balance">0</span>
+              </div>
+
+              <div class="shop-grid" id="shop-grid" aria-live="polite">
+                <article class="shop-card cat-box" data-shop-item="bowtie">
+                  <p class="shop-item-title">Bow tie</p>
+                  <p class="shop-item-copy">A neat ribbon for formal cat days.</p>
+                  <p class="shop-item-price">2 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="bowtie" data-shop-cost="2">Buy</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="glasses">
+                  <p class="shop-item-title">Glasses</p>
+                  <p class="shop-item-copy">For smart little cat club helpers.</p>
+                  <p class="shop-item-price">3 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="glasses" data-shop-cost="3">Buy</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="flower">
+                  <p class="shop-item-title">Flower clip</p>
+                  <p class="shop-item-copy">A soft flower to sit by the ear.</p>
+                  <p class="shop-item-price">2 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="flower" data-shop-cost="2">Buy</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="crown">
+                  <p class="shop-item-title">Crown</p>
+                  <p class="shop-item-copy">A tiny crown for the queen cats.</p>
+                  <p class="shop-item-price">4 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="crown" data-shop-cost="4">Buy</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="necklace">
+                  <p class="shop-item-title">Necklace</p>
+                  <p class="shop-item-copy">A shiny necklace for club photos.</p>
+                  <p class="shop-item-price">3 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="necklace" data-shop-cost="3">Buy</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="backpack">
+                  <p class="shop-item-title">Backpack</p>
+                  <p class="shop-item-copy">A tiny backpack for adventure cats.</p>
+                  <p class="shop-item-price">5 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="backpack" data-shop-cost="5">Buy</button>
+                </article>
               </div>
             </section>
           </section>

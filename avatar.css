@@ -26,6 +26,10 @@
   background: linear-gradient(180deg, #7ed4ff, #9be0ff);
 }
 
+.view-tab-shop {
+  background: linear-gradient(180deg, #ffd58e, #ffbf64);
+}
+
 .view-tab-music {
   background: linear-gradient(180deg, #c7f0ff, #9fe2ff);
 }
@@ -53,6 +57,58 @@
 
 .site-view {
   margin-top: 0.9rem;
+}
+
+.saved-avatar-badge {
+  position: absolute;
+  top: 0.95rem;
+  left: 0.95rem;
+  z-index: 2;
+  display: grid;
+  gap: 0.28rem;
+  width: 6.7rem;
+  padding: 0.45rem 0.45rem 0.55rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.88);
+  box-shadow:
+    0 10px 22px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.saved-avatar-label {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.saved-avatar-stage {
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  margin: 0;
+}
+
+.saved-avatar-stage .avatar-cat {
+  border-width: 0.16rem;
+}
+
+.saved-avatar-stage .avatar-ear {
+  top: -6%;
+  border-width: 0.16rem;
+}
+
+.saved-avatar-stage .avatar-eye {
+  border-width: 0.1rem;
+}
+
+.saved-avatar-stage .avatar-whisker,
+.saved-avatar-stage .avatar-tail,
+.saved-avatar-stage .avatar-clothes,
+.saved-avatar-stage .avatar-mouth,
+.saved-avatar-stage .avatar-nose {
+  border-width: 0.1rem;
 }
 
 .avatar-studio {
@@ -98,6 +154,59 @@
   font-size: 1.05rem;
   line-height: 1.15;
   color: var(--ink-soft);
+}
+
+.avatar-economy {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.45rem 0.65rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.74);
+}
+
+.avatar-bucks-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.avatar-bucks-value {
+  min-width: 2.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(246, 183, 60, 0.18);
+  border: 0.16rem solid rgba(60, 52, 47, 0.16);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.avatar-economy-note {
+  font-size: 0.98rem;
+  line-height: 1.1;
+  color: var(--ink-soft);
+}
+
+.avatar-save-button {
+  appearance: none;
+  justify-self: start;
+  padding: 0.46rem 1rem 0.4rem;
+  border: 0.18rem solid var(--line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f2f8d2, #d9ef98);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .avatar-grid {
@@ -168,6 +277,27 @@
   --fur-light: #ffd8e1;
   --fur-shadow: #d67f98;
   --accent: #c45f7d;
+}
+
+.avatar-stage[data-color="sky"] {
+  --fur: #a7d8f4;
+  --fur-light: #d7f0ff;
+  --fur-shadow: #6aa9cc;
+  --accent: #4b8fba;
+}
+
+.avatar-stage[data-color="cocoa"] {
+  --fur: #b7885d;
+  --fur-light: #dcb58c;
+  --fur-shadow: #8a5f3c;
+  --accent: #6d4527;
+}
+
+.avatar-stage[data-color="sunset"] {
+  --fur: #f29e6b;
+  --fur-light: #ffd1ad;
+  --fur-shadow: #cc7040;
+  --accent: #b85d2f;
 }
 
 .avatar-cat {
@@ -371,6 +501,7 @@
 
 .avatar-option {
   appearance: none;
+  position: relative;
   border: 0.16rem solid var(--line);
   border-radius: 999px;
   padding: 0.35rem 0.7rem 0.3rem;
@@ -380,6 +511,21 @@
   font-size: 0.98rem;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.avatar-option.is-locked {
+  border-style: dashed;
+  background: rgba(255, 248, 235, 0.92);
+}
+
+.avatar-option.is-locked::after {
+  content: attr(data-avatar-lock-label);
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--coral);
+  white-space: nowrap;
 }
 
 .avatar-option.is-selected {
@@ -422,6 +568,151 @@
 
 .avatar-swatch[data-avatar-value="pink"] span[aria-hidden="true"] {
   background: #f3b4c5;
+}
+
+.avatar-stage[data-accessory="none"] .avatar-accessory {
+  display: none;
+}
+
+.avatar-accessory {
+  position: absolute;
+  inset: 14% 13% 17%;
+  pointer-events: none;
+}
+
+.avatar-stage[data-accessory="bowtie"] .avatar-accessory {
+  inset: 58% 33% 18%;
+}
+
+.avatar-stage[data-accessory="bowtie"] .avatar-accessory::before,
+.avatar-stage[data-accessory="bowtie"] .avatar-accessory::after {
+  content: "";
+  position: absolute;
+  top: 28%;
+  width: 42%;
+  height: 32%;
+  background: #ff93c2;
+  border: 0.18rem solid var(--line);
+  border-radius: 1rem 0.4rem 0.4rem 1rem;
+}
+
+.avatar-stage[data-accessory="bowtie"] .avatar-accessory::before {
+  left: 0;
+  transform: rotate(-14deg);
+}
+
+.avatar-stage[data-accessory="bowtie"] .avatar-accessory::after {
+  right: 0;
+  transform: scaleX(-1) rotate(-14deg);
+}
+
+.avatar-stage[data-accessory="glasses"] .avatar-accessory::before {
+  content: "";
+  position: absolute;
+  left: 17%;
+  right: 17%;
+  top: 28%;
+  height: 0.22rem;
+  background: var(--line);
+}
+
+.avatar-stage[data-accessory="glasses"] .avatar-accessory::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 22%;
+  width: 56%;
+  height: 24%;
+  border: 0.18rem solid var(--line);
+  border-radius: 999px;
+  box-shadow:
+    -4.8rem 0 0 -0.18rem var(--line),
+    4.8rem 0 0 -0.18rem var(--line);
+}
+
+.avatar-stage[data-accessory="flower"] .avatar-accessory::before {
+  content: "";
+  position: absolute;
+  left: 58%;
+  top: 9%;
+  width: 18%;
+  height: 18%;
+  background: #ffb5ce;
+  border: 0.18rem solid var(--line);
+  border-radius: 50%;
+  box-shadow:
+    0 -0.95rem 0 0 #ffec8d,
+    -0.9rem -0.3rem 0 0 #ffd8a4,
+    0.9rem -0.3rem 0 0 #ffd8a4,
+    0 0.95rem 0 0 #ffec8d,
+    -0.65rem 0.65rem 0 0 #ffd8a4,
+    0.65rem 0.65rem 0 0 #ffd8a4;
+}
+
+.avatar-stage[data-accessory="crown"] .avatar-accessory::before {
+  content: "";
+  position: absolute;
+  left: 26%;
+  right: 26%;
+  top: 6%;
+  height: 16%;
+  background: linear-gradient(180deg, #f8d76f, #d8a42f);
+  border: 0.18rem solid var(--line);
+  border-radius: 0.8rem 0.8rem 0.4rem 0.4rem;
+  clip-path: polygon(0 100%, 10% 38%, 22% 60%, 38% 12%, 50% 55%, 62% 16%, 78% 58%, 90% 36%, 100% 100%);
+}
+
+.avatar-stage[data-accessory="necklace"] .avatar-accessory::before {
+  content: "";
+  position: absolute;
+  left: 34%;
+  top: 63%;
+  width: 32%;
+  height: 0.9rem;
+  border: 0.18rem solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(180deg, #ffe07d, #f7bd36);
+}
+
+.avatar-stage[data-accessory="necklace"] .avatar-accessory::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 72%;
+  width: 0.7rem;
+  height: 0.7rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #fff0a6;
+  border: 0.16rem solid var(--line);
+}
+
+.avatar-stage[data-accessory="backpack"] .avatar-accessory::before {
+  content: "";
+  position: absolute;
+  left: 30%;
+  top: 46%;
+  width: 40%;
+  height: 34%;
+  background: linear-gradient(180deg, #d8a57a, #b97c4f);
+  border: 0.18rem solid var(--line);
+  border-radius: 28% 28% 24% 24%;
+}
+
+.avatar-stage[data-accessory="backpack"] .avatar-accessory::after {
+  content: "";
+  position: absolute;
+  left: 43%;
+  top: 57%;
+  width: 14%;
+  height: 10%;
+  background: rgba(255, 248, 235, 0.78);
+  border: 0.14rem solid var(--line);
+  border-radius: 999px;
+  box-shadow:
+    -0.9rem -1.7rem 0 0 rgba(255, 255, 255, 0),
+    0.8rem -1.7rem 0 0 rgba(255, 255, 255, 0);
 }
 
 .avatar-stage[data-eyes="round"] .avatar-eye {
@@ -482,6 +773,47 @@
   background: rgba(255, 255, 255, 0.88);
 }
 
+.avatar-stage[data-eyes="heart"] .avatar-eye {
+  width: 16%;
+  height: 14%;
+  border-radius: 35% 35% 0 0;
+  transform: rotate(-45deg);
+  background: #1f1d1e;
+}
+
+.avatar-stage[data-eyes="heart"] .avatar-eye::before,
+.avatar-stage[data-eyes="heart"] .avatar-eye::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1f1d1e;
+}
+
+.avatar-stage[data-eyes="heart"] .avatar-eye::before {
+  top: -48%;
+  left: 0;
+}
+
+.avatar-stage[data-eyes="heart"] .avatar-eye::after {
+  left: 48%;
+  top: 0;
+}
+
+.avatar-stage[data-eyes="moon"] .avatar-eye {
+  width: 16%;
+  height: 16%;
+  border-radius: 50%;
+  background: #1f1d1e;
+}
+
+.avatar-stage[data-eyes="moon"] .avatar-eye::after {
+  inset: 17% 17% 17% 34%;
+  background: var(--fur-light);
+  border-radius: 50%;
+}
+
 .avatar-stage[data-mouth="smile"] .avatar-mouth {
   border-bottom: 0.22rem solid var(--line);
   border-radius: 0 0 999px 999px;
@@ -529,6 +861,39 @@
   height: 0.7rem;
   top: 59%;
   border-bottom: 0.18rem solid var(--line);
+  border-radius: 0 0 999px 999px;
+}
+
+.avatar-stage[data-mouth="grin"] .avatar-mouth {
+  width: 1.9rem;
+  height: 1rem;
+  top: 58%;
+  border: 0.18rem solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 999px 999px;
+  background:
+    linear-gradient(180deg, transparent 0 48%, rgba(255, 255, 255, 0.8) 49% 51%, transparent 52%),
+    rgba(212, 123, 12, 0.15);
+}
+
+.avatar-stage[data-mouth="meow"] .avatar-mouth {
+  width: 1.5rem;
+  height: 1.35rem;
+  top: 57.5%;
+  border: 0.18rem solid var(--line);
+  border-radius: 50% 50% 45% 45%;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.avatar-stage[data-mouth="meow"] .avatar-mouth::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0.02rem;
+  width: 0.5rem;
+  height: 0.65rem;
+  transform: translateX(-50%);
+  background: #f49aad;
   border-radius: 0 0 999px 999px;
 }
 
@@ -649,9 +1014,197 @@
     transparent;
 }
 
+.avatar-stage[data-clothes="vest"] .avatar-clothes {
+  height: 28%;
+  background: linear-gradient(180deg, #cda57b, #a8764f);
+  border: 0.18rem solid var(--line);
+  border-radius: 28% 28% 18% 18% / 22% 22% 18% 18%;
+}
+
+.avatar-stage[data-clothes="vest"] .avatar-clothes::before {
+  content: "";
+  position: absolute;
+  inset: 16% 42% 10%;
+  background: rgba(255, 250, 244, 0.74);
+  border-radius: 999px;
+}
+
+.avatar-stage[data-clothes="raincoat"] .avatar-clothes {
+  height: 29%;
+  background: linear-gradient(180deg, #8ecae6, #5b8fb3);
+  border: 0.18rem solid var(--line);
+  border-radius: 18% 18% 22% 22% / 24% 24% 18% 18%;
+}
+
+.avatar-stage[data-clothes="raincoat"] .avatar-clothes::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -1.05rem;
+  width: 60%;
+  height: 1.1rem;
+  transform: translateX(-50%);
+  background: #d6eef9;
+  border: 0.18rem solid var(--line);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+}
+
+.avatar-stage[data-clothes="dress"] .avatar-clothes {
+  height: 30%;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 30%),
+    linear-gradient(180deg, #f2c35b, #e3a62b);
+  border: 0.18rem solid var(--line);
+  clip-path: polygon(50% 0%, 88% 18%, 100% 100%, 0 100%, 12% 18%);
+}
+
+.avatar-stage[data-clothes="dress"] .avatar-clothes::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 1rem;
+  width: 1.4rem;
+  height: 0.75rem;
+  transform: translateX(-50%);
+  background: rgba(255, 248, 220, 0.8);
+  border-radius: 999px;
+}
+
+.shop-studio {
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+  border: 0.24rem solid var(--line);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12)),
+    rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 10px 22px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.shop-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.shop-kicker,
+.shop-title,
+.shop-note {
+  margin: 0;
+}
+
+.shop-kicker {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.shop-title {
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: clamp(2.4rem, 4vw, 3.5rem);
+  line-height: 0.9;
+}
+
+.shop-note {
+  font-size: 1.05rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.shop-balance {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  width: fit-content;
+  padding: 0.55rem 0.75rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 252, 245, 0.76);
+}
+
+.shop-balance-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.shop-balance-value {
+  min-width: 2.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(246, 183, 60, 0.18);
+  border: 0.16rem solid rgba(60, 52, 47, 0.16);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.shop-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 0.18rem solid rgba(60, 52, 47, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.82);
+}
+
+.shop-item-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.shop-item-copy,
+.shop-item-price {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.15;
+  color: var(--ink-soft);
+}
+
+.shop-item-price {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.shop-buy-button {
+  appearance: none;
+  justify-self: start;
+  min-height: 2.7rem;
+  padding: 0.45rem 0.9rem;
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f2f8d2, #d9ef98);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(68, 51, 36, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
 @media (max-width: 980px) {
   .avatar-grid {
     grid-template-columns: 1fr;
+  }
+
+  .shop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .avatar-preview {
@@ -674,5 +1227,13 @@
 
   .avatar-preview {
     min-height: 21rem;
+  }
+
+  .saved-avatar-badge {
+    width: 5.8rem;
+  }
+
+  .shop-grid {
+    grid-template-columns: 1fr;
   }
 }
