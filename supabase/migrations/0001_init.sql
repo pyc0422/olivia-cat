@@ -21,7 +21,7 @@ set member_group = excluded.member_group,
 
 create table if not exists profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  name text not null unique references allowed_members (name),
+  name text not null unique,
   email text not null unique,
   phone text unique,
   member_group text not null check (member_group in ('members', 'new_members')),
@@ -51,7 +51,7 @@ add column if not exists avatar_accessory text not null default 'none';
 create table if not exists messages (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references profiles (id) on delete cascade,
-  author_name text not null references allowed_members (name),
+  author_name text not null,
   body text not null check (char_length(body) > 0),
   created_at timestamptz not null default now()
 );
@@ -62,7 +62,7 @@ create index if not exists idx_messages_user_id on messages (user_id);
 create table if not exists drawings (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references profiles (id) on delete cascade,
-  author_name text not null references allowed_members (name),
+  author_name text not null,
   title text,
   mime_type text not null default 'image/png',
   data_url text not null,
@@ -75,7 +75,7 @@ create index if not exists idx_drawings_user_id on drawings (user_id);
 create table if not exists videos (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references profiles (id) on delete cascade,
-  author_name text not null references allowed_members (name),
+  author_name text not null,
   title text,
   mime_type text not null default 'video/webm',
   data_url text not null,
@@ -124,9 +124,18 @@ begin
     coalesce(new.raw_user_meta_data ->> 'name', new.email),
     new.email,
     nullif(new.raw_user_meta_data ->> 'phone', ''),
-    coalesce(new.raw_user_meta_data ->> 'member_group', 'members'),
+    case when exists (
+      select 1 from public.allowed_members allowed
+      where allowed.name = coalesce(new.raw_user_meta_data ->> 'name', new.email)
+    ) then (
+      select allowed.member_group from public.allowed_members allowed
+      where allowed.name = coalesce(new.raw_user_meta_data ->> 'name', new.email)
+    ) else 'new_members' end,
     true,
-    coalesce(new.raw_user_meta_data ->> 'level', 'Noob'),
+    case when exists (
+      select 1 from public.allowed_members allowed
+      where allowed.name = coalesce(new.raw_user_meta_data ->> 'name', new.email)
+    ) then coalesce(new.raw_user_meta_data ->> 'level', 'Noob') else 'Noob' end,
     coalesce((new.raw_user_meta_data ->> 'kitty_bucks')::integer, 0),
     coalesce(new.raw_user_meta_data -> 'avatar_unlocks', '{}'::jsonb),
     coalesce(new.raw_user_meta_data ->> 'avatar_color', 'orange'),

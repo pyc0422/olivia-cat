@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { allowedMembers, allowedNames, getAllowedMember } from "../../lib/allowed-members";
+import { getAllowedMember } from "../../lib/allowed-members";
 import { loadStoredCurrentUser, saveStoredCurrentUser } from "../../lib/current-user-storage";
 import { getSupabaseBrowserClient } from "../../lib/supabase-browser";
 
 const defaultForm = {
-  name: allowedNames[0],
+  name: "",
   email: "",
   phone: "",
   password: "",
@@ -127,8 +127,9 @@ export default function AuthClient({ initialMode = "login" }) {
     setError("");
     setMessage("");
 
-    if (!allowedNames.includes(form.name)) {
-      setError("Pick a name from the club list.");
+    const name = form.name.trim();
+    if (!name) {
+      setError("Enter a name.");
       setBusy(false);
       return;
     }
@@ -139,16 +140,16 @@ export default function AuthClient({ initialMode = "login" }) {
       return;
     }
 
-    const member = getAllowedMember(form.name);
+    const member = getAllowedMember(name);
 
     const { error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
         data: {
-          name: form.name,
+          name,
           phone: form.phone || null,
-          member_group: member?.group || "members",
+          member_group: member?.group || "new_members",
           level: member?.level || "Noob",
           avatar_accessory: "none",
         },
@@ -161,26 +162,18 @@ export default function AuthClient({ initialMode = "login" }) {
       return;
     }
 
-    const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
-    if (data.user) {
-      saveStoredCurrentUser(data.user);
-    } else {
-      saveStoredCurrentUser({
-        id: form.email,
-        email: form.email,
-        user_metadata: {
-          name: form.name,
-          phone: form.phone || null,
-          member_group: member?.group || "members",
-          level: member?.level || "Noob",
-          kitty_bucks: 0,
-          avatar_unlocks: {},
-          avatar_accessory: "none",
-        },
-      });
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session?.user) {
+      saveStoredCurrentUser(sessionData.session.user);
+      router.push(getHomePath());
+      router.refresh();
     }
 
-    setMessage("Check your email to verify the account, then sign in.");
+    setMessage(
+      sessionData.session
+        ? "Account created. Welcome to Cat Club!"
+        : "Account created, but Supabase email confirmation is still enabled. Disable it in Supabase Authentication settings to sign in immediately."
+    );
     setBusy(false);
   };
 
@@ -245,7 +238,7 @@ export default function AuthClient({ initialMode = "login" }) {
         <p className="auth-kicker">Cat Club</p>
         <h1 className="auth-title">{title}</h1>
         <p className="auth-copy">
-          Club accounts are limited to the names on the member list. Email is used for verification and password recovery.
+          Official club names keep their club settings. Anyone else can join as a new member. Email is only used for sign-in and password recovery.
         </p>
 
         <div className="auth-switcher">
@@ -264,13 +257,13 @@ export default function AuthClient({ initialMode = "login" }) {
           {form.mode === "signup" ? (
             <label className="auth-field">
               <span>Name</span>
-              <select value={form.name} onChange={(event) => updateField("name", event.target.value)}>
-                {allowedMembers.map((member) => (
-                  <option key={member.name} value={member.name}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(event) => updateField("name", event.target.value)}
+                placeholder="Your name"
+                required
+              />
             </label>
           ) : null}
 

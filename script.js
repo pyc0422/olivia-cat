@@ -1222,6 +1222,18 @@ const initCatClubBoard = () => {
       };
     });
 
+    const officialNameSet = new Set(allowedNames);
+    profiles.forEach((profile) => {
+      if (!officialNameSet.has(profile.name)) {
+        merged.push({
+          ...profile,
+          member_group: profile.member_group || "new_members",
+          board_visible: profile.board_visible !== false,
+          level: profile.level || "Noob",
+        });
+      }
+    });
+
     const visible = merged.filter((profile) => profile.board_visible !== false);
     return visible.length ? visible : buildFallbackProfiles();
   };
