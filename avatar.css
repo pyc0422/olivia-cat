@@ -34,6 +34,11 @@
   background: linear-gradient(180deg, #c7f0ff, #9fe2ff);
 }
 
+.view-tab-games {
+  background: linear-gradient(180deg, #d8f5c0, #b5e990);
+  text-decoration: none;
+}
+
 .view-tab.is-active {
   transform: translateY(-1px);
   box-shadow:
