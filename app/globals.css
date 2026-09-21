@@ -5,6 +5,7 @@
 @import "../video.css";
 @import "../art.css";
 @import "../levels.css";
+@import "../about.css";
 
 :root {
   color-scheme: light;

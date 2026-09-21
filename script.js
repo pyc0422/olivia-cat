@@ -20,6 +20,7 @@ const initCatClubBoard = () => {
   const avatarSaveButton = document.querySelector("#avatar-save-button");
   const avatarButtons = [...document.querySelectorAll(".avatar-option[data-avatar-setting]")];
   const shopBalance = document.querySelector("#shop-balance");
+  const shopVipBalance = document.querySelector("#shop-vip-balance");
   const shopBuyButtons = [...document.querySelectorAll("[data-shop-buy]")];
   const videoRecordButton = document.querySelector("#video-record-button");
   const videoPreview = document.querySelector("#video-preview");
@@ -29,6 +30,7 @@ const initCatClubBoard = () => {
 
   const passwordKey = "catclub-unlocked";
   const viewKey = "catclub-active-view";
+  const hiddenRosterKey = "catclub-hidden-roster";
   const avatarKey = "catclub-avatar";
   const musicKey = "catclub-music";
   const videoDbName = "catclub-videos";
@@ -88,6 +90,10 @@ const initCatClubBoard = () => {
       { value: "crown", label: "Crown", cost: 4, lockedFor: ["new_members"] },
       { value: "necklace", label: "Necklace", cost: 3, lockedFor: ["new_members"] },
       { value: "backpack", label: "Backpack", cost: 5, lockedFor: ["new_members"] },
+      { value: "halo", label: "Halo", cost: 8 },
+      { value: "cape", label: "Magic cape", cost: 10 },
+      { value: "star-crown", label: "Star crown", cost: 12 },
+      { value: "moon-charm", label: "Moon charm", cost: 15 },
     ],
   };
   const allowedAvatarOptions = Object.fromEntries(
@@ -447,6 +453,9 @@ const initCatClubBoard = () => {
 
     if (shopBalance) {
       shopBalance.textContent = String(avatarState.kittyBucks);
+    }
+    if (shopVipBalance) {
+      shopVipBalance.textContent = String(avatarState.kittyBucks);
     }
   };
 
@@ -938,7 +947,7 @@ const initCatClubBoard = () => {
 
   const setActiveView = (viewName) => {
     const nextView =
-      viewName === "avatar" || viewName === "shop" || viewName === "videos" || viewName === "art" || viewName === "levels"
+      viewName === "avatar" || viewName === "shop" || viewName === "shop-vip" || viewName === "videos" || viewName === "art" || viewName === "levels" || viewName === "about"
         ? viewName
         : "board";
 
@@ -1066,8 +1075,8 @@ const initCatClubBoard = () => {
     });
   }
 
-  const shopPanel = siteViews.find((panel) => panel.dataset.viewPanel === "shop");
-  if (shopPanel) {
+  const shopPanels = siteViews.filter((panel) => panel.dataset.viewPanel === "shop" || panel.dataset.viewPanel === "shop-vip");
+  shopPanels.forEach((shopPanel) => {
     shopPanel.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1106,7 +1115,7 @@ const initCatClubBoard = () => {
       await persistAvatarEconomy(currentAvatar);
       setAvatarStatus(`Equipped ${option?.label || value}.`);
     });
-  }
+  });
 
   musicState.enabled = loadMusicPrefs().enabled !== false;
   updateMusicToggle();
@@ -1181,6 +1190,7 @@ const initCatClubBoard = () => {
   };
 
   const getProfileList = async () => {
+    const hiddenNames = new Set(loadJson(hiddenRosterKey, []));
     const buildFallbackProfiles = () =>
       allowedNames.map((name) => ({
         id: null,
@@ -1189,7 +1199,7 @@ const initCatClubBoard = () => {
         level: defaultLevels[name] || "Noob",
         board_visible: true,
         ...fallbackAvatar,
-      }));
+      })).filter((profile) => !hiddenNames.has(profile.name));
 
     if (!canUseRemoteDb) {
       return buildFallbackProfiles();
@@ -1234,7 +1244,7 @@ const initCatClubBoard = () => {
       }
     });
 
-    const visible = merged.filter((profile) => profile.board_visible !== false);
+    const visible = merged.filter((profile) => profile.board_visible !== false && !hiddenNames.has(profile.name));
     return visible.length ? visible : buildFallbackProfiles();
   };
 
@@ -1353,13 +1363,12 @@ const initCatClubBoard = () => {
 
         const remove = async () => {
           if (db && profile.id) {
-            await db.updateProfile(profile.id, { board_visible: false }).catch(() => null);
-          } else {
-            const nextRoster = await getProfileList();
-            const hidden = nextRoster.find((entry) => entry.name === profile.name);
-            if (hidden) {
-              hidden.board_visible = false;
+            const updated = await db.updateProfile(profile.id, { board_visible: false }).catch(() => null);
+            if (!updated) {
+              saveJson(hiddenRosterKey, [...new Set([...loadJson(hiddenRosterKey, []), profile.name])]);
             }
+          } else {
+            saveJson(hiddenRosterKey, [...new Set([...loadJson(hiddenRosterKey, []), profile.name])]);
           }
 
           await renderRoster();

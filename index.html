@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./video.css" />
     <link rel="stylesheet" href="./art.css" />
     <link rel="stylesheet" href="./levels.css" />
+    <link rel="stylesheet" href="./about.css" />
   </head>
   <body>
     <main class="page">
@@ -65,9 +66,12 @@
           <button class="view-tab is-active" type="button" data-view-target="board" aria-pressed="true">Board</button>
           <button class="view-tab view-tab-avatar" type="button" data-view-target="avatar" aria-pressed="false">Avatar</button>
           <button class="view-tab view-tab-shop" type="button" data-view-target="shop" aria-pressed="false">Shop</button>
+          <button class="view-tab view-tab-shop-vip" type="button" data-view-target="shop-vip" aria-pressed="false">Shop VIP</button>
           <button class="view-tab view-tab-video" type="button" data-view-target="videos" aria-pressed="false">Videos</button>
           <button class="view-tab view-tab-art" type="button" data-view-target="art" aria-pressed="false">Art</button>
           <button class="view-tab view-tab-levels" type="button" data-view-target="levels" aria-pressed="false">Levels</button>
+          <button class="view-tab view-tab-about" type="button" data-view-target="about" aria-pressed="false">About</button>
+          <a class="view-tab view-tab-games" href="https://www.mathplayground.com/logic_cat_in_japan.html" target="_blank" rel="noopener noreferrer">Games</a>
           <button class="view-tab view-tab-music" type="button" data-music-toggle aria-pressed="false">Music off</button>
         </nav>
 
@@ -335,6 +339,104 @@
                   <p class="shop-item-copy">A tiny backpack for adventure cats.</p>
                   <p class="shop-item-price">5 Kitty Bucks</p>
                   <button type="button" class="shop-buy-button" data-shop-buy="backpack" data-shop-cost="5">Buy</button>
+                </article>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-shop-vip" data-view-panel="shop-vip" hidden>
+            <section class="shop-studio shop-vip-studio cat-box" aria-label="VIP Shop">
+              <div class="shop-copy">
+                <p class="shop-kicker">VIP Shop</p>
+                <h2 class="shop-title">Rare accessories</h2>
+                <p class="shop-note">Spend your Kitty Bucks on special accessories for your saved cat.</p>
+              </div>
+
+              <div class="shop-balance" aria-live="polite">
+                <span class="shop-balance-label">Kitty Bucks</span>
+                <span class="shop-balance-value" id="shop-vip-balance">0</span>
+              </div>
+
+              <div class="shop-grid" aria-live="polite">
+                <article class="shop-card shop-vip-card cat-box">
+                  <p class="shop-item-title">Halo</p>
+                  <p class="shop-item-copy">A glowing halo for an angel cat.</p>
+                  <p class="shop-item-price">8 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="halo" data-shop-cost="8">Buy</button>
+                </article>
+                <article class="shop-card shop-vip-card cat-box">
+                  <p class="shop-item-title">Magic cape</p>
+                  <p class="shop-item-copy">A cape for cats with big adventures.</p>
+                  <p class="shop-item-price">10 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="cape" data-shop-cost="10">Buy</button>
+                </article>
+                <article class="shop-card shop-vip-card cat-box">
+                  <p class="shop-item-title">Star crown</p>
+                  <p class="shop-item-copy">A sparkling crown for a VIP cat.</p>
+                  <p class="shop-item-price">12 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="star-crown" data-shop-cost="12">Buy</button>
+                </article>
+                <article class="shop-card shop-vip-card cat-box">
+                  <p class="shop-item-title">Moon charm</p>
+                  <p class="shop-item-copy">A moon charm that shines at night.</p>
+                  <p class="shop-item-price">15 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-buy="moon-charm" data-shop-cost="15">Buy</button>
+                </article>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-about" data-view-panel="about" hidden>
+            <section class="about-studio cat-box" aria-label="About Cat Club members">
+              <div class="about-copy">
+                <p class="about-kicker">About</p>
+                <h2 class="about-title">Meet the Cat Club</h2>
+                <p class="about-note">A little space for getting to know our club members.</p>
+              </div>
+
+              <div class="about-grid">
+                <article class="about-card about-card-featured cat-box">
+                  <img class="about-photo" src="images/izzy.jpeg" alt="Izzy smiling" />
+                  <div class="about-card-copy">
+                    <h3>Izzy</h3>
+                    <p>AGE: 9</p>
+                    <p>BIRTH: MAY 20, 2017</p>
+                    <p>JOB: PRESIDENT</p>
+                    <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
+                    <p>DISLIKES: UNSPEAKABLE...</p>
+                  </div>
+                </article>
+                <article class="about-card cat-box">
+                  <div class="about-placeholder" aria-hidden="true">E</div>
+                  <div class="about-card-copy">
+                    <h3>Eve</h3>
+                    <p>More info coming soon.</p>
+                  </div>
+                </article>
+                <article class="about-card cat-box">
+                  <img class="about-photo" src="images/olivia.jpeg" alt="Olivia smiling and making a heart with her hands" />
+                  <div class="about-card-copy">
+                    <h3>Olivia</h3>
+                    <p>AGE: 9</p>
+                    <p>BIRTH: APRIL 28, 2017</p>
+                    <p>JOB: TRAINER AND EVERY OTHER JOB</p>
+                    <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
+                    <p>DISLIKES: NOT TO BE SEEN</p>
+                  </div>
+                </article>
+                <article class="about-card cat-box">
+                  <div class="about-placeholder" aria-hidden="true">A</div>
+                  <div class="about-card-copy">
+                    <h3>Alison</h3>
+                    <p>More info coming soon.</p>
+                  </div>
+                </article>
+                <article class="about-card cat-box">
+                  <div class="about-placeholder" aria-hidden="true">H</div>
+                  <div class="about-card-copy">
+                    <h3>Hailey</h3>
+                    <p>More info coming soon.</p>
+                  </div>
                 </article>
               </div>
             </section>
