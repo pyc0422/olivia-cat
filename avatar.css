@@ -1253,6 +1253,31 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
+.shop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.shop-sell-button,
+.message-reward-button {
+  appearance: none;
+  border: 0.14rem solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  background: linear-gradient(180deg, #ffd4d4, #f3aaaa);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shop-sell-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
 @media (max-width: 980px) {
   .avatar-grid {
     grid-template-columns: 1fr;

@@ -22,6 +22,7 @@ const initCatClubBoard = () => {
   const shopBalance = document.querySelector("#shop-balance");
   const shopVipBalance = document.querySelector("#shop-vip-balance");
   const shopBuyButtons = [...document.querySelectorAll("[data-shop-buy]")];
+  const shopSellButtons = [...document.querySelectorAll("[data-shop-sell]")];
   const videoRecordButton = document.querySelector("#video-record-button");
   const videoPreview = document.querySelector("#video-preview");
   const videoGallery = document.querySelector("#video-gallery");
@@ -449,6 +450,14 @@ const initCatClubBoard = () => {
       button.disabled = false;
       button.dataset.shopState = unlocked ? "owned" : canAfford ? "buy" : "locked";
       button.textContent = unlocked ? (selected ? "Equipped" : "Equip") : canAfford ? "Buy" : `Need ${cost}`;
+    });
+
+    shopSellButtons.forEach((button) => {
+      const value = button.dataset.shopSell;
+      const owned = isAvatarUnlocked("accessory", value);
+      const refund = Math.max(1, Math.floor(Number(button.dataset.shopCost || 0) / 2));
+      button.disabled = !owned;
+      button.textContent = owned ? `Sell +${refund}` : "Sell";
     });
 
     if (shopBalance) {
@@ -1080,13 +1089,31 @@ const initCatClubBoard = () => {
     shopPanel.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const button = event.target.closest("[data-shop-buy]");
+      const button = event.target.closest("[data-shop-buy], [data-shop-sell]");
       if (!button) {
         return;
       }
 
       const value = button.dataset.shopBuy;
-      if (!value) {
+      const sellValue = button.dataset.shopSell;
+      if (!value && !sellValue) {
+        return;
+      }
+
+      if (sellValue) {
+        if (!isAvatarUnlocked("accessory", sellValue)) {
+          return;
+        }
+        const refund = Math.max(1, Math.floor(Number(button.dataset.shopCost || 0) / 2));
+        avatarState.kittyBucks += refund;
+        avatarState.unlocks.accessory = (avatarState.unlocks.accessory || []).filter((entry) => entry !== sellValue);
+        const soldAvatar = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
+        if (soldAvatar.accessory === sellValue) {
+          soldAvatar.accessory = "none";
+        }
+        saveJson(avatarKey, applyAvatar(soldAvatar));
+        await persistAvatarEconomy(soldAvatar);
+        setAvatarStatus(`Sold ${getAvatarOptionMeta("accessory", sellValue)?.label || sellValue} for ${refund} Kitty Bucks.`);
         return;
       }
 
@@ -1139,10 +1166,11 @@ const initCatClubBoard = () => {
   const textArea = document.querySelector("#message-text");
   const membersList = document.querySelector("#members-list");
   const newMembersList = document.querySelector("#new-members-list");
+  const guestsList = document.querySelector("#guests-list");
   const hint = document.querySelector(".message-hint");
   const submitButton = document.querySelector(".message-actions button");
 
-  if (!form || !feed || !authorDisplay || !textArea || !membersList || !newMembersList || !hint || !submitButton) {
+  if (!form || !feed || !authorDisplay || !textArea || !membersList || !newMembersList || !guestsList || !hint || !submitButton) {
     return;
   }
 
@@ -1188,6 +1216,8 @@ const initCatClubBoard = () => {
     profiles: [],
     messages: [],
   };
+  const currentName = resolvedCurrentProfile?.name || currentUser?.user_metadata?.name || storedCurrentUser?.name || "";
+  const isManager = ["Izzy", "Olivia"].includes(currentName);
 
   const getProfileList = async () => {
     const hiddenNames = new Set(loadJson(hiddenRosterKey, []));
@@ -1249,14 +1279,20 @@ const initCatClubBoard = () => {
   };
 
   const loadMessages = async () => {
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
     if (canUseRemoteDb) {
-      return db.loadMessages().catch(() => []);
+      const messages = await db.loadMessages().catch(() => []);
+      return messages.filter((message) => new Date(message.created_at || message.createdAt || 0).getTime() >= cutoff);
     }
 
     try {
       const raw = window.localStorage.getItem("catclub-message-board");
       const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      const messages = Array.isArray(parsed)
+        ? parsed.filter((message) => new Date(message.created_at || message.createdAt || 0).getTime() >= cutoff)
+        : [];
+      saveLegacyMessages(messages);
+      return messages;
     } catch {
       return [];
     }
@@ -1305,6 +1341,25 @@ const initCatClubBoard = () => {
 
       meta.append(author, time);
       card.append(meta, body);
+
+      if (isManager && message.user_id && message.user_id !== (currentUser?.id || resolvedCurrentProfile?.id)) {
+        const rewardButton = document.createElement("button");
+        rewardButton.type = "button";
+        rewardButton.className = "message-reward-button";
+        rewardButton.textContent = "+1 Kitty Buck";
+        rewardButton.addEventListener("click", async () => {
+          try {
+            if (canUseRemoteDb && db?.awardKittyBucks) {
+              await db.awardKittyBucks(message.user_id, 1);
+              rewardButton.textContent = "Kitty Buck given";
+              rewardButton.disabled = true;
+            }
+          } catch {
+            rewardButton.textContent = "Could not give";
+          }
+        });
+        card.append(rewardButton);
+      }
       feed.append(card);
     });
   };
@@ -1315,6 +1370,7 @@ const initCatClubBoard = () => {
     const grouped = {
       members: roster.filter((profile) => profile.member_group === "members"),
       new_members: roster.filter((profile) => profile.member_group === "new_members"),
+      guests: roster.filter((profile) => profile.member_group === "guests"),
     };
     const currentName =
       resolvedCurrentProfile?.name ||
@@ -1357,13 +1413,20 @@ const initCatClubBoard = () => {
         removeButton.textContent = "−";
         removeButton.setAttribute("aria-label", `Remove ${profile.name} from the ${sectionKey === "members" ? "Members" : "New members"} list`);
 
+        const guestButton = document.createElement("button");
+        guestButton.type = "button";
+        guestButton.className = "member-remove member-guest-move";
+        guestButton.textContent = "→";
+        guestButton.hidden = !isManager || sectionKey === "guests";
+        guestButton.setAttribute("aria-label", `Move ${profile.name} to Guests`);
+
         const reveal = () => {
           item.classList.toggle("is-revealed");
         };
 
         const remove = async () => {
           if (db && profile.id) {
-            const updated = await db.updateProfile(profile.id, { board_visible: false }).catch(() => null);
+            const updated = await db.updateProfile(profile.id, isManager ? { member_group: "guests", board_visible: true } : { board_visible: false }).catch(() => null);
             if (!updated) {
               saveJson(hiddenRosterKey, [...new Set([...loadJson(hiddenRosterKey, []), profile.name])]);
             }
@@ -1378,20 +1441,25 @@ const initCatClubBoard = () => {
         removeButton.addEventListener("click", () => {
           void remove();
         });
+        guestButton.addEventListener("click", () => {
+          void remove();
+        });
 
-        item.append(nameButton, removeButton);
+        item.append(nameButton, removeButton, guestButton);
         listEl.append(item);
       });
     };
 
     renderList(membersList, grouped.members, "members");
     renderList(newMembersList, grouped.new_members, "newMembers");
+    renderList(guestsList, grouped.guests, "guests");
 
     window.dispatchEvent(
       new CustomEvent("catclub-roster-changed", {
         detail: {
           members: grouped.members.map((profile) => profile.name),
           newMembers: grouped.new_members.map((profile) => profile.name),
+          guests: grouped.guests.map((profile) => profile.name),
         },
       }),
     );

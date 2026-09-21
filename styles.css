@@ -723,6 +723,18 @@ body::before {
     var(--blue);
 }
 
+.member-card-guests {
+  background:
+    linear-gradient(180deg, rgba(220, 205, 247, 0.98), rgba(194, 178, 226, 0.94)),
+    var(--blue);
+}
+
+.guest-note {
+  margin: -0.25rem auto 0.45rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
 .card-title {
   margin: 0 auto 0.55rem;
   padding: 0 0.3rem;

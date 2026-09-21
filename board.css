@@ -202,3 +202,7 @@
     min-height: 24rem;
   }
 }
+.message-reward-button {
+  margin-top: 0.55rem;
+  background: linear-gradient(180deg, #e1f7b8, #bfe68e);
+}

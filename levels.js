@@ -8,6 +8,7 @@ const initCatClubLevels = () => {
   const levelsGraph = document.querySelector("#levels-graph");
   const membersList = document.querySelector("#levels-members");
   const newMembersList = document.querySelector("#levels-new-members");
+  const guestsList = document.querySelector("#levels-guests");
   const selectedName = document.querySelector("#levels-selected-name");
   const selectedStatus = document.querySelector("#levels-selected-status");
   const levelDownButton = document.querySelector("#levels-down-button");
@@ -17,6 +18,7 @@ const initCatClubLevels = () => {
     !levelsGraph ||
     !membersList ||
     !newMembersList ||
+    !guestsList ||
     !selectedName ||
     !selectedStatus ||
     !levelDownButton ||
@@ -87,12 +89,15 @@ const initCatClubLevels = () => {
     const rows = await db.loadProfiles().catch(() => []);
     const byName = new Map(rows.map((row) => [row.name, row]));
 
-    return allowedNames.map((name) => byName.get(name) || {
+    const official = allowedNames.map((name) => byName.get(name) || {
       id: null,
       name,
       member_group: defaultGroupByName[name] || "members",
       level: defaultLevels[name] || "Noob",
     });
+
+    const officialNames = new Set(allowedNames);
+    return official.concat(rows.filter((row) => !officialNames.has(row.name)));
   };
 
   const saveLevel = async (profile, level) => {
@@ -202,10 +207,12 @@ const initCatClubLevels = () => {
     const grouped = {
       members: state.profiles.filter((profile) => profile.member_group === "members"),
       newMembers: state.profiles.filter((profile) => profile.member_group === "new_members"),
+      guests: state.profiles.filter((profile) => profile.member_group === "guests"),
     };
 
     renderNameList(membersList, grouped.members, "member");
     renderNameList(newMembersList, grouped.newMembers, "new member");
+    renderNameList(guestsList, grouped.guests, "guest");
     renderGraph();
     renderStatus();
   };

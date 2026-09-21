@@ -130,6 +130,16 @@ export default function SupabaseBridge() {
           throw error;
         }
       },
+      async awardKittyBucks(recipientId, amount = 1) {
+        const { data, error } = await client.rpc("award_kitty_bucks", {
+          recipient_id: recipientId,
+          amount,
+        });
+        if (error) {
+          throw error;
+        }
+        return data;
+      },
       async loadDrawings() {
         const { data, error } = await client
           .from("drawings")
