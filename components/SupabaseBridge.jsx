@@ -140,6 +140,16 @@ export default function SupabaseBridge() {
         }
         return data;
       },
+      async setProfileLevel(profileId, level) {
+        const { data, error } = await client.rpc("set_profile_level", {
+          target_id: profileId,
+          next_level: level,
+        });
+        if (error) {
+          throw error;
+        }
+        return data;
+      },
       async loadDrawings() {
         const { data, error } = await client
           .from("drawings")

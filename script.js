@@ -23,6 +23,7 @@ const initCatClubBoard = () => {
   const shopVipBalance = document.querySelector("#shop-vip-balance");
   const shopBuyButtons = [...document.querySelectorAll("[data-shop-buy]")];
   const shopSellButtons = [...document.querySelectorAll("[data-shop-sell]")];
+  const furnitureBuyButtons = [...document.querySelectorAll("[data-shop-furniture]")];
   const videoRecordButton = document.querySelector("#video-record-button");
   const videoPreview = document.querySelector("#video-preview");
   const videoGallery = document.querySelector("#video-gallery");
@@ -33,6 +34,13 @@ const initCatClubBoard = () => {
   const viewKey = "catclub-active-view";
   const hiddenRosterKey = "catclub-hidden-roster";
   const avatarKey = "catclub-avatar";
+  const furnitureKey = "catclub-furniture";
+  const furnitureCatalog = {
+    "cat-bed": "Cat bed",
+    "toy-basket": "Toy basket",
+    "royal-cat-tree": "Royal cat tree",
+    "moon-sofa": "Moon sofa",
+  };
   const musicKey = "catclub-music";
   const videoDbName = "catclub-videos";
   const videoStoreName = "recordings";
@@ -100,6 +108,7 @@ const initCatClubBoard = () => {
   const allowedAvatarOptions = Object.fromEntries(
     Object.entries(avatarCatalog).map(([key, items]) => [key, items.map((item) => item.value)]),
   );
+  const vipShopValues = new Set(["halo", "cape", "star-crown", "moon-charm"]);
   const ambientProgression = [
     [196.0, 246.94, 293.66, 392.0],
     [174.61, 220.0, 261.63, 329.63],
@@ -376,7 +385,15 @@ const initCatClubBoard = () => {
 
   const isAvatarUnlocked = (setting, value) => {
     const option = getAvatarOptionMeta(setting, value);
-    if (!option || !option.lockedFor?.includes("new_members")) {
+    if (!option) {
+      return true;
+    }
+
+    if (setting === "accessory" && vipShopValues.has(value)) {
+      return avatarState.unlocks[setting]?.includes(value) || false;
+    }
+
+    if (!option.lockedFor?.includes("new_members")) {
       return true;
     }
 
@@ -392,7 +409,9 @@ const initCatClubBoard = () => {
       const setting = button.dataset.avatarSetting;
       const value = button.dataset.avatarValue;
       const option = setting && value ? getAvatarOptionMeta(setting, value) : null;
-      const locked = Boolean(option?.lockedFor?.includes("new_members") && avatarState.memberGroup === "new_members" && !isAvatarUnlocked(setting, value));
+      const isVipAccessory = setting === "accessory" && vipShopValues.has(value);
+      const lockedForNewMember = option?.lockedFor?.includes("new_members") && avatarState.memberGroup === "new_members";
+      const locked = Boolean((isVipAccessory || lockedForNewMember) && !isAvatarUnlocked(setting, value));
       const cost = option?.cost || 0;
 
       button.classList.toggle("is-locked", locked);
@@ -446,10 +465,11 @@ const initCatClubBoard = () => {
       const cost = Number(button.dataset.shopCost || option?.cost || 0);
       const canAfford = avatarState.kittyBucks >= cost;
       const selected = normalizedAvatar.accessory === value;
+      const isVipShop = Boolean(button.closest(".shop-vip-studio"));
 
       button.disabled = false;
       button.dataset.shopState = unlocked ? "owned" : canAfford ? "buy" : "locked";
-      button.textContent = unlocked ? (selected ? "Equipped" : "Equip") : canAfford ? "Buy" : `Need ${cost}`;
+      button.textContent = unlocked ? (selected ? "Equipped" : isVipShop ? "Owned" : "Equip") : canAfford ? "Buy" : `Need ${cost}`;
     });
 
     shopSellButtons.forEach((button) => {
@@ -458,6 +478,15 @@ const initCatClubBoard = () => {
       const refund = Math.max(1, Math.floor(Number(button.dataset.shopCost || 0) / 2));
       button.disabled = !owned;
       button.textContent = owned ? `Sell +${refund}` : "Sell";
+    });
+
+    const ownedFurniture = new Set(loadJson(furnitureKey, []));
+    furnitureBuyButtons.forEach((button) => {
+      const value = button.dataset.shopFurniture;
+      const cost = Number(button.dataset.shopCost || 0);
+      const owned = ownedFurniture.has(value);
+      button.disabled = false;
+      button.textContent = owned ? "Owned" : avatarState.kittyBucks >= cost ? "Buy furniture" : `Need ${cost}`;
     });
 
     if (shopBalance) {
@@ -956,7 +985,7 @@ const initCatClubBoard = () => {
 
   const setActiveView = (viewName) => {
     const nextView =
-      viewName === "avatar" || viewName === "shop" || viewName === "shop-vip" || viewName === "videos" || viewName === "art" || viewName === "levels" || viewName === "about"
+      viewName === "avatar" || viewName === "shop" || viewName === "shop-vip" || viewName === "videos" || viewName === "art" || viewName === "levels" || viewName === "about" || viewName === "cat-game"
         ? viewName
         : "board";
 
@@ -1051,9 +1080,10 @@ const initCatClubBoard = () => {
         [setting]: value,
       });
       const lockedForNewMembers = Boolean(option?.lockedFor?.includes("new_members") && avatarState.memberGroup === "new_members");
+      const requiresVipPurchase = setting === "accessory" && vipShopValues.has(value);
       const alreadyUnlocked = isAvatarUnlocked(setting, value);
 
-      if (lockedForNewMembers && !alreadyUnlocked) {
+      if ((lockedForNewMembers || requiresVipPurchase) && !alreadyUnlocked) {
         const cost = option?.cost || 0;
         if (avatarState.kittyBucks < cost) {
           setAvatarStatus(`Need ${cost} Kitty Bucks to unlock ${option?.label || value}.`);
@@ -1081,21 +1111,56 @@ const initCatClubBoard = () => {
       renderSavedAvatarBadge(saved);
       setAvatarStatus("Saved your avatar to the top-left badge.");
       await persistAvatarEconomy(saved);
+      window.dispatchEvent(new CustomEvent("catclub-avatar-saved"));
     });
   }
+
+  window.addEventListener("catclub-game-reward", async (event) => {
+    const { setting, value, label } = event.detail || {};
+    if (!setting || !value || !avatarState.unlocks[setting]) return;
+
+    avatarState.unlocks[setting] = [...new Set([...(avatarState.unlocks[setting] || []), value])];
+    const saved = normalizeAvatar(loadJson(avatarKey, avatarDefaults));
+    saveJson(avatarKey, saved);
+    applyAvatar(saved);
+    await persistAvatarEconomy(saved);
+    setAvatarStatus(`${label || value} unlocked!`);
+  });
 
   const shopPanels = siteViews.filter((panel) => panel.dataset.viewPanel === "shop" || panel.dataset.viewPanel === "shop-vip");
   shopPanels.forEach((shopPanel) => {
     shopPanel.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const button = event.target.closest("[data-shop-buy], [data-shop-sell]");
+      const button = event.target.closest("[data-shop-buy], [data-shop-sell], [data-shop-furniture]");
       if (!button) {
         return;
       }
 
       const value = button.dataset.shopBuy;
       const sellValue = button.dataset.shopSell;
+      const furnitureValue = button.dataset.shopFurniture;
+      if (furnitureValue) {
+        const cost = Number(button.dataset.shopCost || 0);
+        const ownedFurniture = new Set(loadJson(furnitureKey, []));
+        if (ownedFurniture.has(furnitureValue)) {
+          setAvatarStatus(`You already own ${furnitureCatalog[furnitureValue] || furnitureValue}.`);
+          return;
+        }
+        if (avatarState.kittyBucks < cost) {
+          setAvatarStatus(`Need ${cost} Kitty Bucks to buy ${furnitureCatalog[furnitureValue] || furnitureValue}.`);
+          return;
+        }
+
+        avatarState.kittyBucks -= cost;
+        ownedFurniture.add(furnitureValue);
+        saveJson(furnitureKey, [...ownedFurniture]);
+        await persistAvatarEconomy(loadJson(avatarKey, avatarDefaults));
+        syncShopButtons();
+        window.dispatchEvent(new CustomEvent("catclub-furniture-updated"));
+        setAvatarStatus(`Bought ${furnitureCatalog[furnitureValue] || furnitureValue} for ${cost} Kitty Bucks.`);
+        return;
+      }
       if (!value && !sellValue) {
         return;
       }
@@ -1218,6 +1283,39 @@ const initCatClubBoard = () => {
   };
   const currentName = resolvedCurrentProfile?.name || currentUser?.user_metadata?.name || storedCurrentUser?.name || "";
   const isManager = ["Izzy", "Olivia"].includes(currentName);
+  let lastRosterAction = null;
+
+  const undoLastRosterAction = async () => {
+    const action = lastRosterAction;
+    if (!action) return;
+
+    lastRosterAction = null;
+    if (db && action.profile.id) {
+      const restored = await db.updateProfile(action.profile.id, {
+        member_group: action.previousGroup,
+        board_visible: action.previousVisible,
+      }).catch(() => null);
+      if (!restored) {
+        saveJson(hiddenRosterKey, loadJson(hiddenRosterKey, []).filter((name) => name !== action.profile.name));
+      }
+    } else {
+      saveJson(hiddenRosterKey, loadJson(hiddenRosterKey, []).filter((name) => name !== action.profile.name));
+    }
+
+    await renderRoster();
+  };
+
+  if (!window.__catClubRosterUndoBound) {
+    window.__catClubRosterUndoBound = true;
+    document.addEventListener("keydown", (event) => {
+      const target = event.target;
+      const isTextEntry = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable;
+      if (isTextEntry || !(event.metaKey || event.ctrlKey) || event.shiftKey || event.key.toLowerCase() !== "z") return;
+
+      event.preventDefault();
+      void undoLastRosterAction();
+    });
+  }
 
   const getProfileList = async () => {
     const hiddenNames = new Set(loadJson(hiddenRosterKey, []));
@@ -1425,6 +1523,8 @@ const initCatClubBoard = () => {
         };
 
         const remove = async () => {
+          const previousGroup = profile.member_group || (sectionKey === "newMembers" ? "new_members" : sectionKey);
+          const previousVisible = profile.board_visible !== false;
           if (db && profile.id) {
             const updated = await db.updateProfile(profile.id, isManager ? { member_group: "guests", board_visible: true } : { board_visible: false }).catch(() => null);
             if (!updated) {
@@ -1434,6 +1534,11 @@ const initCatClubBoard = () => {
             saveJson(hiddenRosterKey, [...new Set([...loadJson(hiddenRosterKey, []), profile.name])]);
           }
 
+          lastRosterAction = {
+            profile,
+            previousGroup,
+            previousVisible,
+          };
           await renderRoster();
         };
 

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="./art.css" />
     <link rel="stylesheet" href="./levels.css" />
     <link rel="stylesheet" href="./about.css" />
+    <link rel="stylesheet" href="./cat-game.css" />
   </head>
   <body>
     <main class="page">
@@ -71,6 +72,7 @@
           <button class="view-tab view-tab-art" type="button" data-view-target="art" aria-pressed="false">Art</button>
           <button class="view-tab view-tab-levels" type="button" data-view-target="levels" aria-pressed="false">Levels</button>
           <button class="view-tab view-tab-about" type="button" data-view-target="about" aria-pressed="false">About</button>
+          <button class="view-tab view-tab-cat-game" type="button" data-view-target="cat-game" aria-pressed="false">Cat game</button>
           <a class="view-tab view-tab-games" href="https://www.mathplayground.com/logic_cat_in_japan.html" target="_blank" rel="noopener noreferrer">Games</a>
           <button class="view-tab view-tab-music" type="button" data-music-toggle aria-pressed="false">Music off</button>
         </nav>
@@ -346,6 +348,18 @@
                   <p class="shop-item-price">5 Kitty Bucks</p>
                   <div class="shop-actions"><button type="button" class="shop-buy-button" data-shop-buy="backpack" data-shop-cost="5">Buy</button><button type="button" class="shop-sell-button" data-shop-sell="backpack" data-shop-cost="5">Sell</button></div>
                 </article>
+                <article class="shop-card cat-box" data-shop-item="cat-bed">
+                  <p class="shop-item-title">Cat bed</p>
+                  <p class="shop-item-copy">A soft bed for your house.</p>
+                  <p class="shop-item-price">4 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-furniture="cat-bed" data-shop-cost="4">Buy furniture</button>
+                </article>
+                <article class="shop-card cat-box" data-shop-item="toy-basket">
+                  <p class="shop-item-title">Toy basket</p>
+                  <p class="shop-item-copy">A basket full of tiny cat toys.</p>
+                  <p class="shop-item-price">6 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-furniture="toy-basket" data-shop-cost="6">Buy furniture</button>
+                </article>
               </div>
             </section>
           </section>
@@ -355,7 +369,7 @@
               <div class="shop-copy">
                 <p class="shop-kicker">VIP Shop</p>
                 <h2 class="shop-title">Rare accessories</h2>
-                <p class="shop-note">Spend your Kitty Bucks on special accessories for your saved cat.</p>
+                <p class="shop-note">Spend your Kitty Bucks on special accessories for your saved cat. You can buy one of each item.</p>
               </div>
 
               <div class="shop-balance" aria-live="polite">
@@ -388,6 +402,18 @@
                   <p class="shop-item-price">15 Kitty Bucks</p>
                   <div class="shop-actions"><button type="button" class="shop-buy-button" data-shop-buy="moon-charm" data-shop-cost="15">Buy</button><button type="button" class="shop-sell-button" data-shop-sell="moon-charm" data-shop-cost="15">Sell</button></div>
                 </article>
+                <article class="shop-card shop-vip-card cat-box" data-shop-item="royal-cat-tree">
+                  <p class="shop-item-title">Royal cat tree</p>
+                  <p class="shop-item-copy">A legendary climbing tower.</p>
+                  <p class="shop-item-price">14 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-furniture="royal-cat-tree" data-shop-cost="14">Buy furniture</button>
+                </article>
+                <article class="shop-card shop-vip-card cat-box" data-shop-item="moon-sofa">
+                  <p class="shop-item-title">Moon sofa</p>
+                  <p class="shop-item-copy">A dreamy sofa for VIP cats.</p>
+                  <p class="shop-item-price">18 Kitty Bucks</p>
+                  <button type="button" class="shop-buy-button" data-shop-furniture="moon-sofa" data-shop-cost="18">Buy furniture</button>
+                </article>
               </div>
             </section>
           </section>
@@ -409,14 +435,17 @@
                     <p>BIRTH: MAY 20, 2017</p>
                     <p>JOB: PRESIDENT</p>
                     <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
-                    <p>DISLIKES: UNSPEAKABLE...</p>
+                    <p>DISLIKES: UNKNOWN</p>
                   </div>
                 </article>
                 <article class="about-card cat-box">
-                  <div class="about-placeholder" aria-hidden="true">E</div>
+                  <img class="about-photo" src="images/eve.jpeg" alt="Eve smiling" />
                   <div class="about-card-copy">
                     <h3>Eve</h3>
-                    <p>More info coming soon.</p>
+                    <p>AGE: 9</p>
+                    <p>LEVEL: QUEEN</p>
+                    <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
+                    <p>DISLIKES: UNKNOWN</p>
                   </div>
                 </article>
                 <article class="about-card cat-box">
@@ -427,21 +456,27 @@
                     <p>BIRTH: APRIL 28, 2017</p>
                     <p>JOB: TRAINER AND EVERY OTHER JOB</p>
                     <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
-                    <p>DISLIKES: NOT TO BE SEEN</p>
+                    <p>DISLIKES: UNKNOWN</p>
                   </div>
                 </article>
                 <article class="about-card cat-box">
-                  <div class="about-placeholder" aria-hidden="true">A</div>
+                  <img class="about-photo" src="images/alison.jpeg" alt="Alison smiling and wearing glasses" />
                   <div class="about-card-copy">
                     <h3>Alison</h3>
-                    <p>More info coming soon.</p>
+                    <p>AGE: 9</p>
+                    <p>LEVEL: QUEEN</p>
+                    <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
+                    <p>DISLIKES: UNKNOWN</p>
                   </div>
                 </article>
                 <article class="about-card cat-box">
-                  <div class="about-placeholder" aria-hidden="true">H</div>
+                  <img class="about-photo" src="images/hailey.jpeg" alt="Hailey wearing glasses" />
                   <div class="about-card-copy">
                     <h3>Hailey</h3>
-                    <p>More info coming soon.</p>
+                    <p>AGE: 9</p>
+                    <p>LEVEL: QUEEN</p>
+                    <p>LOVES: CATS, DRAWING, ANIME, AND READING</p>
+                    <p>DISLIKES: UNKNOWN</p>
                   </div>
                 </article>
               </div>
@@ -563,6 +598,86 @@
               </div>
             </section>
           </section>
+
+          <section class="site-view site-view-cat-game" data-view-panel="cat-game" hidden>
+            <section class="cat-game-studio cat-box" aria-label="Cat game">
+              <div class="cat-game-copy">
+                <p class="cat-game-kicker">Cat game</p>
+                <h2 class="cat-game-title">Magic Key Meadow</h2>
+                <p class="cat-game-note">Help captured village cats, collect magic keys, and battle clumsy dog enemies. Move with the arrow keys and press Space to attack.</p>
+              </div>
+
+              <div class="cat-game-layout">
+                <div class="cat-game-board" id="cat-game-board" tabindex="0" aria-label="Magic Key Meadow game board">
+                  <div class="cat-game-topbar">
+                    <button class="cat-game-return" id="cat-game-return" type="button">Return to house</button>
+                    <div class="cat-game-health" aria-label="Health">
+                      <span>Health</span>
+                      <div class="cat-game-health-track"><span id="cat-game-health-fill"></span></div>
+                      <strong id="cat-game-health-value">100</strong>
+                    </div>
+                  </div>
+                  <div class="cat-game-player" id="cat-game-player"></div>
+                  <div class="cat-game-key cat-game-key-one" data-key-id="one" aria-label="Magic key">✦</div>
+                  <div class="cat-game-key cat-game-key-two" data-key-id="two" aria-label="Magic key">✦</div>
+                  <div class="cat-game-key cat-game-key-three" data-key-id="three" aria-label="Magic key">✦</div>
+                  <div class="cat-game-key cat-game-key-four" data-key-id="four" aria-label="Magic key">✦</div>
+                  <div class="cat-game-key cat-game-key-five" data-key-id="five" aria-label="Magic key">✦</div>
+                  <div class="cat-game-villager cat-game-villager-one" data-villager-id="one" aria-label="Captured village cat">🐱</div>
+                  <div class="cat-game-villager cat-game-villager-two" data-villager-id="two" aria-label="Captured village cat">🐱</div>
+                  <div class="cat-game-villager cat-game-villager-three" data-villager-id="three" aria-label="Captured village cat">🐱</div>
+                  <div class="cat-game-enemy cat-game-enemy-one" data-enemy-id="one" aria-label="Clumsy evil dog">🐶</div>
+                  <div class="cat-game-enemy cat-game-enemy-two" data-enemy-id="two" aria-label="Clumsy evil dog">🐶</div>
+                  <div class="cat-game-enemy cat-game-enemy-three" data-enemy-id="three" aria-label="Clumsy evil dog">🐶</div>
+                  <div class="cat-game-dialogue" id="cat-game-dialogue" aria-live="polite">Your cat: Let&apos;s rescue the village!</div>
+                  <div class="cat-game-inventory" id="cat-game-inventory" aria-label="Inventory"></div>
+                  <p class="cat-game-hint">Click the meadow, then use ← ↑ ↓ → and Space</p>
+                  <button class="cat-game-fullscreen" id="cat-game-fullscreen" type="button">Full screen</button>
+                </div>
+
+                <aside class="cat-game-quests cat-box" aria-label="Cat game quests">
+                  <p class="cat-game-panel-title">Quest book</p>
+                  <p class="cat-game-key-count"><span id="cat-game-key-count">0</span> / 5 keys</p>
+                  <p class="cat-game-rescue-count"><span id="cat-game-rescue-count">0</span> / 3 village cats rescued</p>
+                  <p class="cat-game-battle-count"><span id="cat-game-battle-count">0</span> / 3 enemies defeated</p>
+                  <p class="cat-game-status" id="cat-game-status">Find three magic keys to unlock your first mission.</p>
+                  <div class="cat-game-mission cat-game-mission-locked" id="cat-game-mission" aria-live="polite">
+                    <span class="cat-game-mission-badge">?</span>
+                    <span><strong>Hidden quest</strong><br />Collect 3 keys to reveal it.</span>
+                  </div>
+                  <p class="cat-game-reward" id="cat-game-reward">Legendary rewards: rescue the village and defeat the dogs.</p>
+                  <div class="cat-game-actions" aria-label="Game actions">
+                    <button type="button" data-cat-action="craft">Craft</button>
+                    <button type="button" data-cat-action="build">Build</button>
+                    <button type="button" data-cat-action="rescue">Rescue</button>
+                    <button type="button" data-cat-action="chat">Chat</button>
+                    <button type="button" data-cat-action="spy">Spy</button>
+                    <button type="button" data-cat-action="restaurant">Restaurant</button>
+                    <button type="button" data-cat-action="eat">Eat</button>
+                    <button type="button" data-cat-action="sleep">Sleep</button>
+                  </div>
+                  <section class="cat-game-house-panel" aria-label="Your cat house">
+                    <p class="cat-game-panel-title">Your house</p>
+                    <div class="cat-game-house" id="cat-game-house" aria-live="polite"></div>
+                    <button class="cat-game-builder" id="cat-game-builder" type="button">Visit builder</button>
+                    <button class="cat-game-enter-house" id="cat-game-enter-house" type="button">Enter house</button>
+                    <p class="cat-game-house-status" id="cat-game-house-status">Your starter bed is ready.</p>
+                  </section>
+                  <section class="cat-game-social" aria-label="Friends and game chat">
+                    <p class="cat-game-panel-title">Friends online</p>
+                    <div class="cat-game-player-list" id="cat-game-player-list"></div>
+                    <p class="cat-game-follow-status" id="cat-game-follow-status">Follow friends and ask them to follow back.</p>
+                    <form class="cat-game-chat-form" id="cat-game-chat-form">
+                      <input id="cat-game-chat-input" type="text" maxlength="120" placeholder="Say something to the club..." aria-label="Game chat message" />
+                      <button type="submit">Chat</button>
+                    </form>
+                    <div class="cat-game-chat-feed" id="cat-game-chat-feed" aria-live="polite"></div>
+                  </section>
+                  <button class="cat-game-reset" id="cat-game-reset" type="button">Reset keys</button>
+                </aside>
+              </div>
+            </section>
+          </section>
         </div>
       </section>
     </main>
@@ -571,5 +686,6 @@
     <script src="./video.js"></script>
     <script src="./art.js"></script>
     <script src="./levels.js"></script>
+    <script src="./cat-game.js"></script>
   </body>
 </html>

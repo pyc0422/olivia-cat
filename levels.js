@@ -102,7 +102,11 @@ const initCatClubLevels = () => {
 
   const saveLevel = async (profile, level) => {
     if (db && profile?.id) {
-      await db.updateProfile(profile.id, { level }).catch(() => null);
+      if (db.setProfileLevel) {
+        await db.setProfileLevel(profile.id, level).catch(() => null);
+      } else {
+        await db.updateProfile(profile.id, { level }).catch(() => null);
+      }
       return;
     }
 

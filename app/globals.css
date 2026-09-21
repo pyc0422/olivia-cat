@@ -6,6 +6,7 @@
 @import "../art.css";
 @import "../levels.css";
 @import "../about.css";
+@import "../cat-game.css";
 
 :root {
   color-scheme: light;

@@ -3,7 +3,7 @@ import path from "node:path";
 import Script from "next/script";
 import { allowedMembers } from "../lib/allowed-members";
 
-const scriptFiles = ["script.js", "video.js", "art.js", "levels.js"];
+const scriptFiles = ["script.js", "video.js", "art.js", "levels.js", "cat-game.js"];
 
 function extractBody(html) {
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
