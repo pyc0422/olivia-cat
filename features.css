@@ -1,0 +1,109 @@
+.view-tab-meeting { background: #e9b6bd; }
+.view-tab-pet-store { background: #c8e2ba; }
+
+.games-studio,
+.meeting-studio,
+.pet-store-studio {
+  display: grid;
+  gap: 0.9rem;
+  padding: clamp(1.2rem, 3vw, 2rem);
+  background: rgba(255, 251, 243, 0.82);
+}
+
+.games-kicker,
+.meeting-kicker,
+.pet-store-kicker {
+  margin: 0;
+  font-family: "Caveat", cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.games-title,
+.meeting-title,
+.pet-store-title {
+  margin: 0;
+  font-family: "Amatic SC", cursive;
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 0.9;
+}
+
+.games-note,
+.meeting-note,
+.pet-store-note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.1rem;
+}
+
+.games-choice-grid,
+.pet-store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.games-choice {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 9rem;
+  align-content: center;
+  padding: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  background: #fff7cf;
+  transition: transform 0.2s ease;
+}
+
+.games-choice:hover { transform: translateY(-0.2rem) rotate(-1deg); }
+.games-choice-icon { font-size: 2.4rem; }
+
+.meeting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.meeting-call-button,
+.meeting-media-button,
+.meeting-join-button,
+.pet-feed-button,
+.pet-item button,
+.call-meeting-button,
+.join-meeting-button {
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  background: #d8f7cb;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.meeting-call-button { background: #f3a3ad; font-size: 1.2rem; }
+.meeting-status { margin: 0; color: var(--ink-soft); }
+.meeting-room { display: grid; gap: 0.7rem; grid-template-columns: minmax(10rem, 20rem) 1fr; align-items: center; }
+.meeting-video { width: 100%; min-height: 12rem; border: 0.16rem solid var(--line); border-radius: 22px; background: #3a3a3a; object-fit: cover; }
+.meeting-room-copy { display: grid; gap: 0.25rem; font-size: 1.25rem; }
+.meeting-participants { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.meeting-person { padding: 0.35rem 0.6rem; border-radius: 999px; background: #d8eff1; }
+
+.pet-store-title { display: flex; gap: 0.6rem; align-items: center; }
+.pixel-cat-icon { display: inline-block; font-family: monospace; image-rendering: pixelated; animation: pet-cat-bob 0.9s steps(2, end) infinite; }
+@keyframes pet-cat-bob { 50% { transform: translateY(-0.25rem); } }
+.pet-status { padding: 0.7rem; border-radius: 16px; background: #fff4b7; }
+.pet-item { display: grid; gap: 0.35rem; padding: 1rem; background: #fffdf6; }
+.pet-item h3, .pet-item p { margin: 0; }
+.pet-item p { color: var(--ink-soft); }
+.pet-item-icon { font-size: 2.5rem; }
+.pet-item button { justify-self: start; padding: 0.4rem 0.7rem; background: #d8eff1; }
+.pet-feed-button { justify-self: start; background: #ffe36c; }
+
+.call-meeting-button { display: block; width: 100%; margin-top: 0.6rem; background: #f3a3ad; }
+.meeting-notification { margin: 0.6rem 0 0; font-weight: 700; }
+.join-meeting-button { margin-top: 0.4rem; padding: 0.4rem 0.7rem; }
+
+@media (max-width: 650px) {
+  .meeting-room { grid-template-columns: 1fr; }
+}

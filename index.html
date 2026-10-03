@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="./cat-game.css" />
   </head>
   <body>
+    <div class="cat-loading" id="cat-loading" role="status" aria-live="polite">
+      <div class="cat-loading-spinner" aria-hidden="true">🐱</div>
+      <p>Loading Cat Club...</p>
+    </div>
     <main class="page">
       <section class="poster" id="site-poster" aria-label="Cat Club website draft">
         <header class="masthead">
@@ -73,7 +77,9 @@
           <button class="view-tab view-tab-levels" type="button" data-view-target="levels" aria-pressed="false">Levels</button>
           <button class="view-tab view-tab-about" type="button" data-view-target="about" aria-pressed="false">About</button>
           <button class="view-tab view-tab-cat-game" type="button" data-view-target="cat-game" aria-pressed="false">Cat game</button>
-          <a class="view-tab view-tab-games" href="https://www.mathplayground.com/logic_cat_in_japan.html" target="_blank" rel="noopener noreferrer">Games</a>
+          <button class="view-tab view-tab-games" type="button" data-view-target="games" aria-pressed="false">Games</button>
+          <button class="view-tab view-tab-meeting" type="button" data-view-target="meeting" aria-pressed="false">Call meeting</button>
+          <button class="view-tab view-tab-pet-store" type="button" data-view-target="pet-store" aria-pressed="false"><span class="pixel-cat-icon">🐱</span> Pet store</button>
           <button class="view-tab view-tab-music" type="button" data-music-toggle aria-pressed="false">Music off</button>
         </nav>
 
@@ -95,6 +101,9 @@
                   <p class="note-small">h.e.zhao@icloud.com</p>
                   <p class="note-small">isabellazhang520@gmail.com</p>
                   <a class="chat-button" href="sms:" aria-label="Chat here in Messages">Chat here</a>
+                  <button class="call-meeting-button" id="call-meeting-button" type="button">Call meeting</button>
+                  <p class="meeting-notification" id="meeting-notification" hidden></p>
+                  <button class="join-meeting-button" id="join-meeting-button" type="button" hidden>Join meeting</button>
                 </div>
               </aside>
 
@@ -646,6 +655,7 @@
                     <span><strong>Hidden quest</strong><br />Collect 3 keys to reveal it.</span>
                   </div>
                   <p class="cat-game-reward" id="cat-game-reward">Legendary rewards: rescue the village and defeat the dogs.</p>
+                  <button class="cat-game-level-up" id="cat-game-level-up" type="button">Level up and unlock new missions</button>
                   <div class="cat-game-actions" aria-label="Game actions">
                     <button type="button" data-cat-action="craft">Craft</button>
                     <button type="button" data-cat-action="build">Build</button>
@@ -678,6 +688,56 @@
               </div>
             </section>
           </section>
+
+          <section class="site-view site-view-games" data-view-panel="games" hidden>
+            <section class="games-studio cat-box">
+              <p class="games-kicker">Games</p>
+              <h2 class="games-title">Choose a game</h2>
+              <p class="games-note">Open a game in a new tab and come back to Cat Club whenever you want.</p>
+              <div class="games-choice-grid">
+                <a class="games-choice cat-box" href="https://geometrydash-pc.com/" target="_blank" rel="noopener noreferrer">
+                  <span class="games-choice-icon">◆</span><strong>Geometry dash</strong><span>Open game</span>
+                </a>
+                <a class="games-choice cat-box" href="https://www.mathplayground.com/logic_cat_in_japan.html" target="_blank" rel="noopener noreferrer">
+                  <span class="games-choice-icon">🐱</span><strong>Cat in Japan</strong><span>Open game</span>
+                </a>
+              </div>
+            </section>
+          </section>
+
+          <section class="site-view site-view-meeting" data-view-panel="meeting" hidden>
+            <section class="meeting-studio cat-box">
+              <p class="meeting-kicker">Cat Club calls</p>
+              <h2 class="meeting-title">Community meeting room</h2>
+              <p class="meeting-note">Start your camera and microphone, then share the meeting link with friends. The room announcement appears for Cat Club members.</p>
+              <div class="meeting-actions">
+                <button class="meeting-call-button" id="meeting-call-button" type="button">Start a meeting</button>
+                <button class="meeting-media-button" id="meeting-media-button" type="button">Turn on camera and mic</button>
+              </div>
+              <p class="meeting-status" id="meeting-status">No active meeting.</p>
+              <div class="meeting-room" id="meeting-room" hidden>
+                <video class="meeting-video" id="meeting-video" autoplay muted playsinline></video>
+                <div class="meeting-room-copy"><strong id="meeting-caller-name">Cat Club friend</strong><span id="meeting-room-id"></span></div>
+                <div class="meeting-participants" id="meeting-participants" aria-live="polite"></div>
+              </div>
+              <button class="meeting-join-button" id="meeting-join-button" type="button" hidden>Join this meeting</button>
+            </section>
+          </section>
+
+          <section class="site-view site-view-pet-store" data-view-panel="pet-store" hidden>
+            <section class="pet-store-studio cat-box">
+              <p class="pet-store-kicker">Pet store</p>
+              <h2 class="pet-store-title"><span class="pixel-cat-icon">🐱</span> Cat supplies</h2>
+              <p class="pet-store-note">Keep your cat fed. If food runs out, visit here to restock.</p>
+              <div class="pet-status" id="pet-status">Your cat is checking the shelves.</div>
+              <div class="pet-store-grid">
+                <article class="pet-item cat-box"><span class="pet-item-icon">🐟</span><h3>Cat food</h3><p>Feeds your cat and restores energy.</p><button type="button" data-pet-buy="food">Buy food</button></article>
+                <article class="pet-item cat-box"><span class="pet-item-icon">🧶</span><h3>Yarn toy</h3><p>A cozy toy for a happy cat.</p><button type="button" data-pet-buy="toy">Buy toy</button></article>
+                <article class="pet-item cat-box"><span class="pet-item-icon">🪶</span><h3>Feather toy</h3><p>A playful new distraction.</p><button type="button" data-pet-buy="toy">Buy toy</button></article>
+              </div>
+              <button class="pet-feed-button" id="pet-feed-button" type="button">Feed cat</button>
+            </section>
+          </section>
         </div>
       </section>
     </main>
@@ -687,5 +747,6 @@
     <script src="./art.js"></script>
     <script src="./levels.js"></script>
     <script src="./cat-game.js"></script>
+    <script src="./features.js"></script>
   </body>
 </html>

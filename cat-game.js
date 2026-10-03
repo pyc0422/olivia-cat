@@ -24,9 +24,10 @@
   const builderButton = document.querySelector("#cat-game-builder");
   const houseStatus = document.querySelector("#cat-game-house-status");
   const resetButton = document.querySelector("#cat-game-reset");
+  const levelUpButton = document.querySelector("#cat-game-level-up");
   const gamePanel = document.querySelector('[data-view-panel="cat-game"]');
 
-  if (!board || !player || !count || !status || !mission || !rescueCount || !battleCount || !reward || !healthFill || !healthValue || !inventory || !dialogue || !fullscreenButton || !returnButton || !enterHouseButton || !playerList || !followStatus || !chatForm || !chatInput || !chatFeed || !house || !builderButton || !houseStatus || !resetButton || !gamePanel) return;
+  if (!board || !player || !count || !status || !mission || !rescueCount || !battleCount || !reward || !healthFill || !healthValue || !inventory || !dialogue || !fullscreenButton || !returnButton || !enterHouseButton || !playerList || !followStatus || !chatForm || !chatInput || !chatFeed || !house || !builderButton || !houseStatus || !resetButton || !levelUpButton || !gamePanel) return;
 
   const progressKey = "catclub-cat-game-progress";
   const furnitureKey = "catclub-furniture";
@@ -52,6 +53,7 @@
   let health = 100;
   let inventoryState = { fish: 2, wood: 0, potion: 0, charm: 0 };
   let levelWon = false;
+  let gameLevel = 1;
   let following = new Set();
   let chatMessages = [];
   let playerNames = ["Izzy", "Olivia", "Lexi", "Eve", "Alison", "Hailey", "Elise", "Audrey"];
@@ -68,6 +70,7 @@
         health = Math.max(0, Math.min(100, Number(stored.health ?? 100)));
         inventoryState = { ...inventoryState, ...(stored.inventory || {}) };
         levelWon = stored.levelWon === true;
+        gameLevel = Math.max(1, Number(stored.level || 1));
       }
     } catch {
       collected = new Set();
@@ -83,6 +86,7 @@
         health,
         inventory: inventoryState,
         levelWon,
+        level: gameLevel,
       }));
     } catch {
       // Ignore storage failures.
@@ -250,6 +254,8 @@
     count.textContent = String(collected.size);
     rescueCount.textContent = String(rescued.size);
     battleCount.textContent = String(defeated.size);
+    levelUpButton.classList.toggle("is-ready", levelWon);
+    levelUpButton.textContent = `Level up from level ${gameLevel}`;
     healthFill.style.width = `${health}%`;
     healthFill.style.background = health <= 30 ? "#d85f58" : health <= 60 ? "#e3a33e" : "#69aa68";
     healthValue.textContent = String(health);
@@ -264,12 +270,12 @@
     if (rescued.size >= 3 && defeated.size >= 3) {
       levelWon = true;
       gamePanel.classList.add("cat-game-level-won");
-      status.textContent = "Village quest complete! Your legendary rewards are ready.";
+      status.textContent = `Level ${gameLevel} complete! Your legendary rewards are ready.`;
       dialogue.textContent = "All the village cats are safe! You won the level!";
     } else if (collected.size >= 3) {
       status.textContent = "Quest unlocked! Rescue the village cats and defeat the clumsy dogs.";
       mission.classList.remove("cat-game-mission-locked");
-      mission.innerHTML = '<span class="cat-game-mission-badge">!</span><span><strong>Village Rescue Mission</strong><br />Rescue 3 cats and defeat 3 dogs.</span>';
+      mission.innerHTML = `<span class="cat-game-mission-badge">!</span><span><strong>Mission complete</strong><br />Level ${gameLevel} is ready to advance.</span>`;
     } else {
       gamePanel.classList.remove("cat-game-level-won");
       status.textContent = `Find ${3 - collected.size} more magic key${3 - collected.size === 1 ? "" : "s"} to unlock your first mission.`;
@@ -439,6 +445,20 @@
     health = 100;
     inventoryState = { fish: 2, wood: 0, potion: 0, charm: 0 };
     levelWon = false;
+    gameLevel = 1;
+    saveProgress();
+    render();
+    board.focus();
+  });
+  levelUpButton.addEventListener("click", () => {
+    if (!levelWon) return;
+    gameLevel += 1;
+    collected.clear();
+    rescued.clear();
+    defeated.clear();
+    health = 100;
+    levelWon = false;
+    say(`New mission: Level ${gameLevel} begins! Rescue the next village.`);
     saveProgress();
     render();
     board.focus();

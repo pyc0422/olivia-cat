@@ -7,6 +7,7 @@ const initCatClubBoard = () => {
 
   void (async () => {
   const gate = document.querySelector("#password-gate");
+  const loading = document.querySelector("#cat-loading");
   const passwordInput = document.querySelector("#password-input");
   const passwordError = document.querySelector("#password-error");
   const poster = document.querySelector("#site-poster");
@@ -985,7 +986,7 @@ const initCatClubBoard = () => {
 
   const setActiveView = (viewName) => {
     const nextView =
-      viewName === "avatar" || viewName === "shop" || viewName === "shop-vip" || viewName === "videos" || viewName === "art" || viewName === "levels" || viewName === "about" || viewName === "cat-game"
+      viewName === "avatar" || viewName === "shop" || viewName === "shop-vip" || viewName === "videos" || viewName === "art" || viewName === "levels" || viewName === "about" || viewName === "cat-game" || viewName === "games" || viewName === "meeting" || viewName === "pet-store"
         ? viewName
         : "board";
 
@@ -1018,6 +1019,7 @@ const initCatClubBoard = () => {
     if (gate) {
       gate.hidden = true;
     }
+    loading?.classList.add("is-hidden");
     try {
       window.sessionStorage.setItem(passwordKey, "true");
     } catch {

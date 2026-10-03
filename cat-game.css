@@ -2,6 +2,45 @@
   background: #f4c95d;
 }
 
+.cat-loading {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  background: var(--paper, #f5efe3);
+  color: var(--ink, #3c342f);
+  text-align: center;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.cat-loading.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cat-loading-spinner {
+  font-family: monospace;
+  font-size: 4rem;
+  image-rendering: pixelated;
+  animation: cat-loading-spin 0.85s steps(8, end) infinite;
+}
+
+.cat-loading p {
+  margin: 0;
+  font-family: "Caveat", cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+@keyframes cat-loading-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.08); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
 .cat-game-studio {
   display: grid;
   gap: 1.2rem;
@@ -151,6 +190,42 @@
 .cat-game-player .avatar-cat {
   transform: scale(0.72);
   transform-origin: top center;
+  image-rendering: pixelated;
+}
+
+.meeting-cat-preview {
+  width: 3.6rem;
+  height: 3.6rem;
+  min-height: 0;
+  padding: 0;
+  border: 0.12rem solid var(--line);
+  border-radius: 14px;
+  background: #fff4b7;
+  image-rendering: pixelated;
+}
+
+.meeting-cat-preview .avatar-cat {
+  transform: scale(0.34);
+  transform-origin: top center;
+  image-rendering: pixelated;
+}
+
+.cat-game-level-up {
+  display: none;
+  width: 100%;
+  margin-top: 0.4rem;
+  border: 0.16rem solid var(--line);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  background: #ffe36c;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cat-game-level-up.is-ready {
+  display: block;
 }
 
 .cat-game-key {
